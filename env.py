@@ -1,6 +1,8 @@
 import numpy as np
 from numpy.typing import NDArray
 from typing import TypeVar, Generic, Any
+from magent2.environments import battle_v4
+import magent2
 
 T = TypeVar('T', bound=np.generic)
 
@@ -14,12 +16,28 @@ class Grid:
 
 
 class Environment:
-    grid: Grid
+    #grid: Grid
 
     def __init__(self, grid: Grid, population1: NDArray[T], population2: NDArray[T]):
-          self.population1 = population1
-          self.population2 = population2
-          pass
+        #self.population1 = population1
+        #self.population2 = population2
+        config = magent2.gridworld.Config()
+        args = {"map_width": 50, "map_height": 50, "embedding_size": 1, "render_dir": "", 
+                  "seed": 5, "food_mode": False, "turn_mode": False, "minimap_mode": False}
+        config.set(args)
+        attr1 = {}
+        config.register_agent_type("agent1", attr1)
+        attr2 = {}
+        config.register_agent_type("agent2", attr2)
+
+        env = magent2.Gridworld(config)
+        pass
+    
+    def create_population1(self):
+        
+        return
+
+
      
     '''
     Plays a round of the game
