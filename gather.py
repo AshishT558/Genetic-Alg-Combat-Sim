@@ -100,7 +100,9 @@ last_reward(extra_features=True)| 1
 * v0: Initial MAgent2 release (0.3.0)
 
 """
-
+# import subprocess
+# import sys
+# subprocess.call([sys.executable, 'gather.py'])
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_to_aec_wrapper
