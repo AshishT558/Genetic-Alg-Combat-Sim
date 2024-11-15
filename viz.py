@@ -85,7 +85,8 @@ agent_options = {
         "step_reward": step_reward, #Gather: -0.01, Battle: 0.1
         "attack_penalty": attack_penalty, #Gather: -0.1, Battle: -0.1
         "dead_penalty": dead_penalty, #Gather: -1, Battle: -0.1
-        "kill_reward": 5
+        "kill_reward": 5,
+        "kill_supply": 5
     }
 
 # need agent symbol for each agent type
