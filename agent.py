@@ -25,6 +25,7 @@ class StrategySet:
         self.resourcefulness = resourcefulness
 
 class Agent:
+    id: str
     pos_x: int
     pos_y: int
     skill_set: SkillSet
