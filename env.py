@@ -62,8 +62,9 @@ class Grid:
 
 class Environment:
     grid: Grid
+    combat_weights: NDArray[T]
 
-    def __init__(self, grid: Grid, population1, population2):
+    def __init__(self, grid: Grid, population1, population2, combat_weights):
         self.grid = grid
         self.num_turns = 50
         self.population1 = population1
@@ -77,6 +78,9 @@ class Environment:
             #self.pop2_ids.append(id)
             self.grid.board.add_occupant(agent.pos_x, agent.pos_y, agent)
         self.grid.randomly_place_food()
+
+        # randomly determined combat weights:
+        self.combat_weights = combat_weights
      
     '''
     Plays a round of the game
@@ -141,6 +145,7 @@ class Environment:
     the two agents fight
     '''
     def fight(self, agent1, agent2):
+        # Case where 
         pass
     
     '''
