@@ -33,9 +33,9 @@ attributes_cost = {"strength": 5, "dodge": 5, "speed": 10, "view_range": 10, "he
 # have a random generation of attributes (opponent)
 
 # randomly generate weights for combat damage
-rng = np.random.default_rng()
-weights = rng.standard_normal(2)
-damage = attributes[0][0] * weights[0] + attributes[0][1] * weights[1]
+rng = np.random.normal(loc=0.25, scale = 0.15, size=2) # Adjust scale to change variance
+combat_weights = abs(rng) / np.sum(abs(rng)) # Normalize weights
+damage = attributes[0][0] * combat_weights[0] + attributes[0][1] * combat_weights[1]
 
 # should we also randomize point cost for speed, view_range, health, attack_range?
     # this would make the game more interesting as "optimal" would change each game between a tanky, slow, high damage agent or a fast, low damage, high range agent based on the 
@@ -105,11 +105,25 @@ food_options = {
     }
 food = cfg.register_agent_type(name="food", attr=food_options)
 
-player_pop_1 = cfg.register_agent_type("p_pop_1", agent_options) #sector range vs. circle range
-
+# Player's starting stats:
+player_pop_1 = cfg.register_agent_type("p_pop_1", agent_options) 
 player_team = cfg.add_groups(player_pop_1)
+player_pop_1_s = cfg.AgentSymbol(player_pop_1, 100) # index must be deterministic int or "any"/"all" agents in a group. range 0-100 
 
-opposing_team = cfg.add_groups()
+# Opponent AI starting stats:
+opponent_pop_1 = cfg.register_agent_type("o_pop_1", agent_options)
+opposing_team = cfg.add_groups(opponent_pop_1)
+opponent_pop_1_s = cfg.AgentSymbol(opponent_pop_1, 200) # range 101-200
+
+# Reward shaping:
+# Cases Food:
+# 1: Player Attacks Food
+cfg.add_reward_rule(gw.Event(player_pop_1_s, "attack", food), receiver=player_pop_1_s, value = food_options["kill_reward"])
+# 2: Opponent Attacks Food
+cfg.add_reward_rule(gw.Event(opponent_pop_1_s "attack", food), receiver = opponent_pop_1_s, value = food_options["kill_reward"])
+## OPTIONAL: kills food?
+
+
 
 
 
