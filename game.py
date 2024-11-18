@@ -10,7 +10,7 @@ def initialize_game():
     # Skill Point Costs:
     skill_set_cost = {}
     for i in getattr(SkillSet, '__annotations__').keys(): # list of attributes in skillset
-        # case for all skills (combat determinant)
+        # case for all skills
         skill_set_cost[i] = 10
 
         # override for specific attributes (outside of combat) 

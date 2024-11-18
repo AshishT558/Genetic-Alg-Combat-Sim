@@ -157,6 +157,11 @@ class Environment:
 
     
     def genetic_algorithm(self, population):
+        # Fitness determined by Energy remaining after a round (Descending)
+        # Cross-Over: (Pair adjacent agents, create new agent with average of their attributes)
+        # Mutation: (Random updates)
+            # Optional: Mutate, then for each new child cross-over with top 10% of population?
+        
          pass
     
     '''
