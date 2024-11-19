@@ -19,6 +19,9 @@ def calculate_fitness(agent, total_energy):
 
 # Battle function
 def battle(agent1, agent2):
+    # self.combat_weights
+    # damage1 = max(agent1["strength"] * self.combat_weights[0] - agent2["defense"] * self.combat_weights[1], 0)
+    # damage2 = max(agent2["strength"] * self.combat_weights[0] - agent1["defense"] * self.combat_weights[1], 0)
     damage1 = max(agent1["strength"] - agent2["defense"], 0)
     damage2 = max(agent2["strength"] - agent1["defense"], 0)
     agent1["energy"] -= damage2
@@ -97,6 +100,7 @@ def genetic_algorithm(pop_size, stat_range, generations, battles_per_round):
             child = mutate(child, stat_range)
             new_agents_pop2.append(child)
 
+        # Combine populations
         pop1.extend(new_agents_pop1)
         pop2.extend(new_agents_pop2)
 
