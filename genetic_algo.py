@@ -97,7 +97,6 @@ def genetic_algorithm(pop_size, stat_range, generations, battles_per_round):
             child = mutate(child, stat_range)
             new_agents_pop2.append(child)
 
-        # Combine populations
         pop1.extend(new_agents_pop1)
         pop2.extend(new_agents_pop2)
 

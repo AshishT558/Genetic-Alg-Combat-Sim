@@ -61,7 +61,11 @@ class Agent:
     '''
     def update_energy_after_turn():
         # do calculations for how much energy is lost after a turn
+        #if food present:
+        # energy = energy - 1(speed) - 5(vision) + 30
+        
         # update_energy(some num)
+
         pass
 
     '''
@@ -69,5 +73,6 @@ class Agent:
     '''
     def update_energy(self, energy):
         self.energy_level += energy
+
         pass
 
