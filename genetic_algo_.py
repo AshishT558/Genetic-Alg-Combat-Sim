@@ -19,6 +19,9 @@ def calculate_fitness(agent, total_energy):
 
 # Battle function
 def battle(agent1, agent2):
+    # self.combat_weights
+    # damage1 = max(agent1["strength"] * self.combat_weights[0] - agent2["defense"] * self.combat_weights[1], 0)
+    # damage2 = max(agent2["strength"] * self.combat_weights[0] - agent1["defense"] * self.combat_weights[1], 0)
     damage1 = max(agent1["strength"] - agent2["defense"], 0)
     damage2 = max(agent2["strength"] - agent1["defense"], 0)
     agent1["energy"] -= damage2
