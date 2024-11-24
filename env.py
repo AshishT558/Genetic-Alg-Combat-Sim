@@ -26,7 +26,21 @@ class Grid:
         max_x = min(len(self.board), curr_x + vision + 1)
         min_y = max(0, curr_y - vision)
         max_y = min(len(self.board[0]), curr_y + vision + 1)
-        return self.board[min_x:max_x, min_y:max_y]
+        view_range = self.board[min_x:max_x, min_y:max_y]
+        
+        # agents position relative to the view range
+        agent_x = vision
+        agent_y = vision
+        if curr_x - vision < 0:
+            agent_x = curr_x
+        elif curr_x + vision + 1 >= len(self.board):
+            agent_x = len(view_range) - (len(self.board) - curr_x)
+        if curr_y - vision < 0:
+            agent_y = curr_y
+        elif curr_y + vision + 1 >= len(self.board[0]):
+            agent_y = len(view_range[0]) - (len(self.board[0]) - curr_y)
+        
+        return view_range, agent_x, agent_y
     
     def find_conflicts(self):
         all_conflicts = []
@@ -62,24 +76,27 @@ class Grid:
 
 class Environment:
     grid: Grid
-    combat_weights: NDArray[T]
+    #combat_weights: NDArray[T]
 
+    '''
+    population1 is a nparray of agents for the first population
+    population2 is a nparray of agents for the second population
+    combat_weights is a dictionary mapping each skill to its corresponding weight
+        ex: {"strength": 0.2, "defense": 0.45, "agility": 0.2, "resilience": 0.15}
+    
+    '''
     def __init__(self, grid: Grid, population1, population2, combat_weights):
         self.grid = grid
         self.num_turns = 50
         self.population1 = population1
         self.population2 = population2
-        #self.pop1_ids = np.array([])
-        for id, agent in population1.items():
-            #self.pop1_ids.append(id)
+        for agent in population1:
             self.grid.board.add_occupant(agent.pos_x, agent.pos_y, agent)
-        #self.pop2_ids = np.array([])
-        for id, agent in population2.items():
-            #self.pop2_ids.append(id)
+        for agent in population2:
             self.grid.board.add_occupant(agent.pos_x, agent.pos_y, agent)
         self.grid.randomly_place_food()
 
-        # randomly determined combat weights:
+        # randomly determined combat weights: combat weights is a dictionary
         self.combat_weights = combat_weights
      
     '''
@@ -99,8 +116,6 @@ class Environment:
             all_conflicts = self.grid.find_conflicts()
             for conflict in all_conflicts:
                 self.fight(conflict[0], conflict[1])
-        
-        pass
     
     
     '''
@@ -115,13 +130,15 @@ class Environment:
         # create grid
         # call agent.move(grid)
         for agent in turn_order:
-            #agent = self.get_agent(id)
             curr_x, curr_y, vision = agent.get_grid_details()
-            grid_view = self.grid.get_view_range(curr_x, curr_y, vision)
-            new_x, new_y = agent.move(grid_view)
-            self.relocate_agent(agent, curr_x, curr_y, new_x, new_y)
-            if self.grid.has_food(new_x, new_y):
-                self.agent_eats_food(agent, new_x, new_y)
+            grid_view, agent_x, agent_y = self.grid.get_view_range(curr_x, curr_y, vision)
+            new_x, new_y = agent.move(grid_view, agent_x, agent_y)
+            # if agent moves to a new location, update location
+            # otherwise, do nothing
+            if curr_x != new_x or curr_y != new_y:
+                self.relocate_agent(agent, curr_x, curr_y, new_x, new_y)
+                if self.grid.has_food(new_x, new_y):
+                    self.agent_eats_food(agent, new_x, new_y)
     
     def relocate_agent(self, agent, old_x, old_y, new_x, new_y):
         self.grid.remove_occupant(old_x, old_y, agent)
@@ -130,23 +147,46 @@ class Environment:
     def agent_eats_food(self, agent, x, y):
         self.grid.eat_food(x, y)
         # function to increase agent's energy after eating food
-        agent.eat_food()
-    
-    '''
-    def get_agent(self, agent_id):
-        if agent_id in self.population1:
-            return self.population1[agent_id]
-        elif agent_id in self.population2:
-            return self.population2[agent_id]
-    '''
-    
+        agent.eat_food() 
 
     '''
     the two agents fight
     '''
     def fight(self, agent1, agent2):
-        # Case where 
-        pass
+        agent1_score = self.calculate_weighted_score(agent1)
+        agent2_score = self.calculate_weighted_score(agent2)
+        agent1_status = True
+        agent2_status = True
+        if agent1_score > agent2_score:
+            agent1_status = agent1.update_energy(50)
+            agent2_status = agent2.update_energy(-50)
+        elif agent1_score < agent2_score:
+            agent1_status = agent1.update_energy(-50)
+            agent2_status = agent2.update_energy(50)
+        else:
+            agent1_status = agent1.update_energy(-25)
+            agent2_status = agent2.update_energy(-25)
+        
+        # if agent has died after the fight, remove them from game
+        if not agent1_status:
+            self.eliminate_agent(agent1)
+        if not agent2_status:
+            self.eliminate_agent(agent2)
+        
+    
+    def eliminate_agent(self, agent):
+        curr_x, curr_y = agent.get_current_position()
+        self.grid.remove_occupant(curr_x, curr_y, agent)
+        if np.isin(self.population1, agent):
+            index = np.where(self.population1 == agent)[0][0]
+            self.population1 = np.delete(self.population1, index)
+        elif np.isin(self.population2, agent):
+            index = np.where(self.population2 == agent)[0][0]
+            self.population2 = np.delete(self.population2, index)
+        
+    
+    def calculate_weighted_score(self, agent):
+        return (agent.get_strength() * self.combat_weights['strength']) + (agent.get_defense() * self.combat_weights['defense']) + (agent.get_agility() * self.combat_weights['agility']) + (agent.get_resilience() * self.combat_weights['resilience'])
     
     '''
     At the end of a round, updates both population by performing a genetic algorithm
@@ -162,11 +202,12 @@ class Environment:
         # Mutation: (Random updates)
             # Optional: Mutate, then for each new child cross-over with top 10% of population?
         
+        # call genetic_algorithm() from genetic_algo_.py
          pass
     
     '''
     Presents final stats information after all rounds
     '''
     def final_stats(self):
-         pass
+        pass
     

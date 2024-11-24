@@ -1,10 +1,13 @@
 from agent import *
+import numpy as np
+from env import *
 
 '''
 Initializes game by asking users for inputs and creating environments + agents
 Returns: environment
 '''
 def initialize_game():
+    '''
     starting_points = 100 # Change according to balancing
     
     # Skill Point Costs:
@@ -25,12 +28,26 @@ def initialize_game():
 
     # Numpy array for combat stats
     skill_set_combat = np.zeros(shape=(1,len(skill_set_cost) - 1))
-
-    # Generate combat weights (Genetic algorithm will converge to maximize these weights):
-    rng = np.random.normal(loc=0.25, scale = 0.15, size=skill_set_combat.shape[1]) # Adjust scale to change variance
-    combat_weights = abs(rng) / np.sum(abs(rng)) # Normalize weights
-    # Pass combat_weights to environment
-    pass
+    '''
+    ########
+    
+    board_dim = 50
+    grid = Grid(board_dim, board_dim)
+    
+    # populations of agents
+    population1 = np.array([])
+    population2 = np.array([])
+    
+    num_skills = 4
+    weights = np.random.rand(num_skills)  # Generate random numbers
+    weights /= weights.sum()  
+    skill_types = ["strength", "defense", "agility", "resilience"]
+    combat_weights = {}
+    for i in range(num_skills):
+        combat_weights[skill_types[i]] = weights[i]
+    
+    env = Environment(grid, population1, population2, combat_weights)
+    return env
 
 
 def run():

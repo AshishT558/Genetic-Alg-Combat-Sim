@@ -47,10 +47,17 @@ class Agent:
 
     '''
     move() -> (x,y)
-    - takes in local grid from environment
+    - takes in agent's view range, which includes occuoants of each cell, from environment and 
+      agent's x and y position relative to the given view range
     - return a preferred position to move to x,y
+    Restrictions:
+    - before making a move, check that agent won't use up all energy
+       - if any move would use up all agent, then agent should probably not make 
+       - any move and stay in the same position, so return curent position
+    - agent can't move to a cell that already has two agents
+       
     '''
-    def move(grid: Grid):
+    def move(self, view_range, view_x, view_y):
         # get local grid using vision from Skillset
         x = 0
         y = 0
@@ -67,8 +74,16 @@ class Agent:
 
     '''
     Update the energy level with the given energy
+    Returns boolean, true if the agent is still alive after upating the energy, 
+    false if the agent has died after updating the energy
     '''
     def update_energy(self, energy):
         self.energy_level += energy
-        pass
+        if self.energy_level < 0:
+            return False
+        else:
+            return True
+    
+    def get_current_position(self):
+        return self.pos_x, self.pos_y
 
