@@ -58,6 +58,7 @@ def draw_agents():
     pass
 
 def draw_food():
+    # keep an array of grids with food squares?
     pass
 
 # Hash grid squares to positions? 
