@@ -1,13 +1,6 @@
 '''
 Pygames to provide visualizations of the environment
 Docu: https://www.pygame.org/docs/
-
-ACTIVEEVENT       gain, state
-KEYDOWN           key, mod, unicode, scancode
-KEYUP             key, mod, unicode, scancode
-MOUSEMOTION       pos, rel, buttons, touch
-MOUSEBUTTONUP     pos, button, touch
-MOUSEBUTTONDOWN   pos, button, touch
 '''
 import pygame
 from env import *
@@ -63,11 +56,12 @@ def draw_agents():
 def draw_food():
     pass
 
+# Hash grid squares to positions? 
 
-
-
-
-
+# Map room to grid cell positions
+def position_to_grid(position):
+    row, col = position
+    return col * CELL_SIZE, row * CELL_SIZE
 
 setup()
 running = True
