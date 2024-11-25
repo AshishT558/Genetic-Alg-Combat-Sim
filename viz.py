@@ -51,6 +51,10 @@ def draw_grid():
 #  - food will be a sprite 
 
 def draw_agents():
+    # x, y = position_to_grid(position)
+    # center_x = x + CELL_SIZE // 2
+    # center_y = y + CELL_SIZE // 2
+    # pygame.draw.circle(screen, GREEN, (center_x, center_y), CELL_SIZE // 4)
     pass
 
 def draw_food():
