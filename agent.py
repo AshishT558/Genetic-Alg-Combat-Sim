@@ -7,6 +7,7 @@ class SkillSet:
     strength: int
     defense: int
     agility: int
+    resilience: int
     vision: int
 
     def __init__(self, strength: int, defense: int, agility: int, resilience: int, vision: int):
@@ -43,7 +44,7 @@ class Agent:
     Returns current location and dimensions of desired vision grid
     '''
     def get_grid_details(self):
-        pass
+        return self.x, self.y, self.skill_set.vision
 
     '''
     move() -> (x,y)
