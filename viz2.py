@@ -2,13 +2,14 @@ import pygame
 import sys
 import random
 from pytmx import load_pygame
+# from fight_viz import *
 
 # Initialize Pygame
 pygame.init()
 
 # Screen settings
-SCREEN_WIDTH, SCREEN_HEIGHT = 1000, 800
-GRID_ROWS, GRID_COLS = 50, 50  # Number of rows and columns in the grid
+SCREEN_WIDTH, SCREEN_HEIGHT = 640, 640
+GRID_ROWS, GRID_COLS = 40, 40  # Number of rows and columns in the grid
 CELL_SIZE = SCREEN_WIDTH // GRID_COLS  # Size of each cell
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Agent Selection")
@@ -129,18 +130,18 @@ def initialize_agents(frames_left, frames_right):
 
 # Draw grid function
 def draw_grid():
-    # ti = tmxdata.get_tile_image_by_gid
-    # for layer in tmxdata.visible_layers:
-    #     for x, y, gid in layer:
-    #         tile = ti(gid)
-    #         if tile:
-    #             screen.blit(tile, (x * tmxdata.tilewidth, y * tmxdata.tileheight))
+    # Pygames grid
     for row in range(GRID_ROWS):
         for col in range(GRID_COLS):
             rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
             pygame.draw.rect(screen, (200, 200, 200), rect, 1)  # Draw grid lines
-            # tile = ti(gid)
-            # screen.blit(tile, (col * CELL_SIZE, row * CELL_SIZE))
+
+    # Tiled map (Underneath)
+    layer = tmxdata.get_layer_by_name("Tile Layer 1")
+    for x, y, gid in layer:
+                tile = tmxdata.get_tile_image_by_gid(gid)
+                screen.blit(tile, (x * CELL_SIZE, y * CELL_SIZE))
+            
 
 # Main game loop
 selected_agents = []
@@ -148,6 +149,8 @@ agents = []
 
 while True:
     for event in pygame.event.get():
+        # if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+        #     draw_agent_fight()
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
@@ -162,17 +165,20 @@ while True:
                         frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
                         frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
                         agents = initialize_agents(frames_left, flip_frames(frames_right))
-
+        
     if len(selected_agents) < 2:
         draw_agent_selection(selected_agents)
     else:
-        screen.fill((135, 206, 235))  # Sky blue background
+        # screen.fill((135, 206, 235))  # Sky blue background
         draw_grid()
-
+        
         # Update and draw agents
         for agent in agents:
             agent.update_animation()
             agent.draw()
+    
+    
+        
 
     pygame.display.flip()
     clock.tick(60)
