@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+from pytmx import load_pygame
 
 # Initialize Pygame
 pygame.init()
@@ -12,6 +13,9 @@ CELL_SIZE = SCREEN_WIDTH // GRID_COLS  # Size of each cell
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Agent Selection")
 clock = pygame.time.Clock()
+
+# Load the map
+tmxdata = load_pygame(("map.tmx"))
 
 # Load the sprite sheets
 sprite_sheet_1 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/1/Idle.png").convert_alpha()
@@ -125,10 +129,18 @@ def initialize_agents(frames_left, frames_right):
 
 # Draw grid function
 def draw_grid():
+    # ti = tmxdata.get_tile_image_by_gid
+    # for layer in tmxdata.visible_layers:
+    #     for x, y, gid in layer:
+    #         tile = ti(gid)
+    #         if tile:
+    #             screen.blit(tile, (x * tmxdata.tilewidth, y * tmxdata.tileheight))
     for row in range(GRID_ROWS):
         for col in range(GRID_COLS):
             rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
             pygame.draw.rect(screen, (200, 200, 200), rect, 1)  # Draw grid lines
+            # tile = ti(gid)
+            # screen.blit(tile, (col * CELL_SIZE, row * CELL_SIZE))
 
 # Main game loop
 selected_agents = []
