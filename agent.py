@@ -19,7 +19,11 @@ class SkillSet:
         self.resilience = resilience
         self.vision = vision
         self.speed = speed
-    
+
+class Config:
+    food_energy = 20
+    energy_change_per_turn = -2
+
 class StrategySet:
     aggressiveness: int
     resourcefulness: int
@@ -50,23 +54,36 @@ class Agent:
     def get_grid_details(self):
         return self.x, self.y, self.skill_set.vision
 
+
+
+    def containsObjectOfInterest(cell_contents, resourceful_or_aggressive):
+        if resourceful_or_aggressive == "food":
+            return "food" in cell_contents
+        else:
+            for x in cell_contents:
+                if isinstance(x, Agent):
+                    return True
+
     '''
     Moving according to an aggressive game strategy. Returns an x,y to move to. 
+    Moving according to an aggressive game strategy. Returns an x,y to move to.
     '''
-    def aggressive_move(view_range, view_x, view_y):
-        return 
-    
+    def aggressive_move(self, view_range, view_x, view_y):
+        return calculate_move(self, view_range, view_x, view_y, "agent")
     '''
     Moving according to a resourcefulness game strategy. Returns an x,y to move to.
     '''
-    def resourceful_move(self, view_range, view_x, view_y):
+    def aggressive_move(self, view_range, view_x, view_y):
+        return calculate_move(self, view_range, view_x, view_y, "food")
+
+
         closest_food = None
         min_distance = float('inf')
         
         # Loop through the view range to find food
         for i in range(len(view_range)):
             for j in range(len(view_range[i])):
-                if "food" in view_range[i][j]:
+                if containsObjectOfInterest(view_range[i][j] resourceful_or_aggressive):
                     distance = abs(view_x - i) + abs(view_y - j)
                     if distance < min_distance:  
                         min_distance = distance
@@ -74,23 +91,41 @@ class Agent:
         
         if closest_food:
             food_x, food_y = closest_food
-            
-            #  change x
-            if food_x < view_x:
-                self.pos_x -= 1  # up
-            elif food_x > view_x:
-                self.pos_x += 1  # down
-            
-            # change y
-            if food_y < view_y:
-                self.pos_y -= 1  # left
-            elif food_y > view_y:
-                self.pos_y += 1  # right
+
+            numMoves = self.skill_set.speed
+
+            while numMoves > 0 and  food_x != view_x:
+                #  change x
+                if food_x < view_x:
+                    self.pos_x -= 1  # up
+                    view_x -= 1
+                elif food_x > view_x:
+                    self.pos_x += 1  # down
+                    view_x += 1
+                numMoves -= 1
+
+            # chang
+            while numMoves > 0 and  food_x != view_x:e y
+                if food_y < view_y:
+                    self.pos_y -= 1  # left
+                    view_y -= 1
+                elif food_y > view_y:
+                    self.pos_y += 1  # right
+                    view_y += 1
+                numMoves -= 1
+
             
             return self.pos_x, self.pos_y
-        
-        # If no food is found, stay in place
-        return view_x, view_y
+
+        # If no food is found, move randomly
+        modifier=1
+        if(random.random() > .5):
+            modifier = -1
+        if(random.random() > .):
+            self.pos_x += modifier
+        else:
+            self.pos_y += modifier
+        return self.pos_x, self.pos_y
     '''
     move() -> (x,y)
     - takes in agent's view range, which includes occupants of each cell, from environment and 
@@ -115,7 +150,7 @@ class Agent:
 
         aggres_pct = aggres / (aggres + resour)
 
-        probability = random.random()
+        probability = random.random(0,1)
         
         #determine whether to use aggressiveness or resourcefulness 
         if probability < aggres_pct:
@@ -125,7 +160,7 @@ class Agent:
 
         ## determine how much to move based on vision
 
-        return x,y 
+        return x,y
 
     '''
     Update the energy level after a turn
@@ -133,7 +168,7 @@ class Agent:
     def update_energy_after_turn(self):
         # do calculations for how much energy is lost after a turn
         # update_energy(some num)
-        self.update_energy(-2)
+        self.update_energy(Config.energy_change_per_turn)
 
     '''
     Update the energy level with the given energy
@@ -153,7 +188,7 @@ class Agent:
 
 
     def eat_food(self):
-        return 
+        self.energy_level += Config.food_energy
     
     
     def get_skill(self, skill):
