@@ -59,10 +59,38 @@ class Agent:
     '''
     Moving according to a resourcefulness game strategy. Returns an x,y to move to.
     '''
-    def resourceful_move(view_range, view_x, view_y):
-        return
-    
-
+    def resourceful_move(self, view_range, view_x, view_y):
+        closest_food = None
+        min_distance = float('inf')
+        
+        # Loop through the view range to find food
+        for i in range(len(view_range)):
+            for j in range(len(view_range[i])):
+                if "food" in view_range[i][j]:
+                    distance = abs(view_x - i) + abs(view_y - j)
+                    if distance < min_distance:  
+                        min_distance = distance
+                        closest_food = (i, j)
+        
+        if closest_food:
+            food_x, food_y = closest_food
+            
+            #  change x
+            if food_x < view_x:
+                self.pos_x -= 1  # up
+            elif food_x > view_x:
+                self.pos_x += 1  # down
+            
+            # change y
+            if food_y < view_y:
+                self.pos_y -= 1  # left
+            elif food_y > view_y:
+                self.pos_y += 1  # right
+            
+            return self.pos_x, self.pos_y
+        
+        # If no food is found, stay in place
+        return view_x, view_y
     '''
     move() -> (x,y)
     - takes in agent's view range, which includes occupants of each cell, from environment and 
@@ -86,12 +114,11 @@ class Agent:
         resour = self.strategy_set.resourcefulness
 
         aggres_pct = aggres / (aggres + resour)
-        resour_pct = 1 - aggres_pct
 
-        probability = random.randint()
+        probability = random.random()
         
         #determine whether to use aggressiveness or resourcefulness 
-        if probability >= aggres_pct:
+        if probability < aggres_pct:
             x,y = self.aggressive_move(view_range, view_x, view_y)
         else:
             x,y = self.resourceful_move(view_range, view_x, view_y)
