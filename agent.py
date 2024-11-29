@@ -66,18 +66,6 @@ class Agent:
             return False
 
 
-    '''
-    Moving according to an aggressive game strategy. Returns an x,y to move to.
-    '''
-    def aggressive_move(self, view_range, view_x, view_y):
-        return calculate_move(self, view_range, view_x, view_y, "agent")
-
-    '''
-    Moving according to a resourcefulness game strategy. Returns an x,y to move to.
-    '''
-    def resourceful_move(self, view_range, view_x, view_y):
-        return calculate_move(self, view_range, view_x, view_y, "food")
-
 
     def calculate_move(self, view_range, view_x, view_y, resourceful_or_aggressive: str):
         closest_food = None
@@ -86,7 +74,7 @@ class Agent:
         # Loop through the view range to find food
         for i in range(len(view_range)):
             for j in range(len(view_range[i])):
-                if containsObjectOfInterest(view_range[i][j] resourceful_or_aggressive):
+                if self.containsObjectOfInterest(view_range[i][j], resourceful_or_aggressive):
                     distance = abs(view_x - i) + abs(view_y - j)
                     if distance < min_distance:  
                         min_distance = distance
@@ -107,8 +95,8 @@ class Agent:
                     view_x += 1
                 numMoves -= 1
 
-            # chang
-            while numMoves > 0 and  food_x != view_x:e y
+            # change y 
+            while numMoves > 0 and  food_x != view_x:
                 if food_y < view_y:
                     self.pos_y -= 1  # left
                     view_y -= 1
@@ -124,11 +112,24 @@ class Agent:
         modifier=1
         if(random.random() > .5):
             modifier = -1
-        if(random.random() > .):
+        if(random.random() > .5):
             self.pos_x += modifier
         else:
             self.pos_y += modifier
         return self.pos_x, self.pos_y
+    
+    '''
+    Moving according to an aggressive game strategy. Returns an x,y to move to.
+    '''
+    def aggressive_move(self, view_range, view_x, view_y):
+        return self.calculate_move(self, view_range, view_x, view_y, "agent")
+
+    '''
+    Moving according to a resourcefulness game strategy. Returns an x,y to move to.
+    '''
+    def resourceful_move(self, view_range, view_x, view_y):
+        return self.calculate_move(self, view_range, view_x, view_y, "food")
+    
     '''
     move() -> (x,y)
     - takes in agent's view range, which includes occupants of each cell, from environment and 
