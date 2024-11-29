@@ -63,20 +63,23 @@ class Agent:
             for x in cell_contents:
                 if isinstance(x, Agent):
                     return True
+            return False
+
 
     '''
-    Moving according to an aggressive game strategy. Returns an x,y to move to. 
     Moving according to an aggressive game strategy. Returns an x,y to move to.
     '''
     def aggressive_move(self, view_range, view_x, view_y):
         return calculate_move(self, view_range, view_x, view_y, "agent")
+
     '''
     Moving according to a resourcefulness game strategy. Returns an x,y to move to.
     '''
-    def aggressive_move(self, view_range, view_x, view_y):
+    def resourceful_move(self, view_range, view_x, view_y):
         return calculate_move(self, view_range, view_x, view_y, "food")
 
 
+    def calculate_move(self, view_range, view_x, view_y, resourceful_or_aggressive: str):
         closest_food = None
         min_distance = float('inf')
         
