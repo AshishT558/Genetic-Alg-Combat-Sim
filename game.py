@@ -1,7 +1,6 @@
 from agent import *
 import numpy as np
 from env import *
-
 '''
 Initializes game by asking users for inputs and creating environments + agents
 Returns: environment

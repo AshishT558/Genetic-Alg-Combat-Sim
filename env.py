@@ -19,7 +19,10 @@ class Grid:
         self.board[i][j].append(occupant)
     
     def remove_occupant(self, i, j, occupant):
-        self.board[i][j].remove(occupant)
+        if occupant in self.board[i][j]:
+            self.board[i][j].remove(occupant)
+        else:
+            print(f"Warning: Attempted to remove occupant {occupant} from ({i}, {j}), but it was not found.")
         
     def get_view_range(self, curr_x, curr_y, vision):
         min_x = max(0, curr_x - vision)
@@ -77,7 +80,7 @@ class Grid:
 class Environment:
     grid: Grid
     #combat_weights: NDArray[T]
-
+    
     '''
     population1 is a nparray of agents for the first population
     population2 is a nparray of agents for the second population
@@ -98,7 +101,7 @@ class Environment:
 
         # randomly determined combat weights: combat weights is a dictionary
         self.combat_weights = combat_weights
-     
+        
     '''
     Plays a round of the game
     '''
@@ -192,19 +195,14 @@ class Environment:
     At the end of a round, updates both population by performing a genetic algorithm
     '''
     def update_population(self):
+        self.pop_size1= len(self.population1)
+        self.pop_size2= len(self.population2)
         self.population1, self.population2, best_agent_pop1, best_agent_pop2 = genetic_algorithm(
-            self.population1, self.population2, self.stat_range, self.pop_size
+            self.population1, self.population2,self.pop_size1 , self.pop_size2
         )
 
     
-    def genetic_algorithm(self, population):
-        # Fitness determined by Energy remaining after a round (Descending)
-        # Cross-Over: (Pair adjacent agents, create new agent with average of their attributes)
-        # Mutation: (Random updates)
-            # Optional: Mutate, then for each new child cross-over with top 10% of population?
-        
-        # call genetic_algorithm() from genetic_algo_.py
-        pass
+    
     
     '''
     Presents final stats information after all rounds
