@@ -2,7 +2,7 @@ import numpy as np
 from numpy.typing import NDArray
 from typing import TypeVar, Generic, Any
 import random
-
+from genetic_algo_ import *
 T = TypeVar('T', bound=np.generic)
 
 class Grid:
@@ -192,8 +192,9 @@ class Environment:
     At the end of a round, updates both population by performing a genetic algorithm
     '''
     def update_population(self):
-        self.genetic_algorithm(self.population1)
-        self.genetic_algorithm(self.population2)
+        self.population1, self.population2, best_agent_pop1, best_agent_pop2 = genetic_algorithm(
+            self.population1, self.population2, self.stat_range, self.pop_size
+        )
 
     
     def genetic_algorithm(self, population):
@@ -203,7 +204,7 @@ class Environment:
             # Optional: Mutate, then for each new child cross-over with top 10% of population?
         
         # call genetic_algorithm() from genetic_algo_.py
-         pass
+        pass
     
     '''
     Presents final stats information after all rounds
