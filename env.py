@@ -55,7 +55,7 @@ class Grid:
     def randomly_place_food(self):
         rows = len(self.board)
         cols = len(self.board[0])
-        num_food = (rows * cols) / 4
+        num_food = int((rows * cols) / 4)
         positions = random.sample([(r, c) for r in range(rows) for c in range(cols)], num_food)
 
         # Place the items in the selected positions

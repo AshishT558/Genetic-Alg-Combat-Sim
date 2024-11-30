@@ -34,6 +34,16 @@ def initialize_game():
     board_dim = 50
     grid = Grid(board_dim, board_dim)
     
+    print("Hello Player 1! Please enter the desired skill set, strategy, and powerups for your agents.")
+    print()
+    user1_skills, user1_strat, user1_upgrades = get_user_inputs()
+    print(user1_skills, user1_strat, user1_upgrades)
+    print()
+    print("Hello Player 2! Please enter the desired skill set, strategy, and powerups for your agents.")
+    print()
+    user2_skills, user2_strat, user2_upgrades = get_user_inputs()
+    print(user2_skills, user2_strat, user2_upgrades)
+
     # populations of agents
     population1 = np.array([])
     population2 = np.array([])
@@ -60,4 +70,114 @@ def run():
 
     env.final_stats()
 
+def get_user_inputs():
+    strength = 0
+    defense = 0
+    agility = 0
+    resilience = 0
+    print("An agent has a skill set of strength, defense, agility, and resilience. Indicate how many points you would like to assign to each skill. The total number of points can not be more than 200.")
+    while True:
+        points_left = 200
+        while True:
+            try:
+                strength = int(input("Strength: "))
+                if strength < 0 or strength > 200:
+                    print("Invalid input. Strength must be a value between 0 and 200.")
+                    continue
+                points_left -= strength
+                break
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+        
+        print(f"Points left: {points_left}")
+        while True:
+            try:
+                defense = int(input("Defense: "))
+                if defense < 0 or defense > 200:
+                    print("Invalid input. Defense must be a value between 0 and 200.")
+                    continue
+                points_left -= defense
+                break
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+        
+        print(f"Points left: {points_left}")
+        while True:
+            try:
+                agility = int(input("Agility: "))
+                if agility < 0 or agility > 200:
+                    print("Invalid input. Agility must be a value between 0 and 200.")
+                    continue
+                points_left -= agility
+                break
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+              
+        print(f"Points left: {points_left}")  
+        while True:
+            try:
+                resilience = int(input("Resilience: "))
+                if resilience < 0 or resilience > 200:
+                    print("Invalid input. Resilience must be a value between 0 and 200.")
+                    continue
+                points_left -= resilience
+                break
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+        
+        if strength + defense + agility + resilience > 200:
+            print("The total number of points is over 200. Please assign the values again.")
+        else:
+            break
+        
+    print(f"The agents' skillset is strength: {strength}, defense: {defense}, agility: {agility}, and resilience: {resilience}")
+    print()
+        
+    print("An agent's strategy is based on Aggressiveness vs Resourcefulness. Pick the weight (a percentage) that you want to assign to your agent's aggressiveness, with the complement being assigned to the agent's resourcefulness.")
+    while True:
+        try:
+            aggressiveness = int(input("Aggressiveness: "))
+            if aggressiveness < 0 or aggressiveness > 100:
+                print("Invalid input. Aggressiveness should be between 0 and 100.")
+                continue
+            resourcefulness = 100 - aggressiveness
+            break
+        except ValueError:
+            print("Invalid input. Please enter a number.")
     
+    print(f"The agents' aggressiveness is {aggressiveness}% and resourcefulness is {resourcefulness}%")
+    print()
+    
+    print("An agent can also have vision or speed upgrades. However, choosing to upgrade from the default level of 1 would mean that an agent loses more energy after every turn.")
+    vision = 0
+    print("Vision refers to how far away the agent can see, with the levels corresponding to how many cells away the agent can observe. The possible vision levels are 1x, 2x, or 3x.")
+    while True:
+        try:
+            vision = int(input("Vision (1, 2, 3): "))
+            if vision <= 0 or vision > 3:
+                print("Invalid input. Possible vision levels are 1, 2, and 3.")
+                continue
+            break
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+    
+    speed = 0
+    print("Speed refers to how fast an agent can move in one move, with the levels corresponding to how many cells away the agent can go in one move. The possible speed levels are 1x, 2x, or 3x.")
+    while True:
+        try:
+            speed = int(input("Speed (1, 2, 3): "))
+            if speed <= 0 or speed > 3:
+                print("Invalid input. Possible speed levels are 1, 2, and 3.")
+                continue
+            break
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+    
+    print(f"The agents' vision level is {vision}x and speed level is {speed}x")
+    print()
+    
+    return [strength, defense, agility, resilience], [aggressiveness, resourcefulness], [vision, speed]
+
+
+
+#run()
