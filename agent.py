@@ -33,6 +33,7 @@ class StrategySet:
         self.resourcefulness = resourcefulness
 
 class Agent:
+    #ids as pop#_agent# (ex. 1_73 or 2_6)
     id: str
     pos_x: int
     pos_y: int
@@ -41,7 +42,8 @@ class Agent:
 
     
 
-    def __init__(self, skill_set: SkillSet, strategy_set: StrategySet, pos_x: int, pos_y: int):
+    def __init__(self, id: str, skill_set: SkillSet, strategy_set: StrategySet, pos_x: int, pos_y: int):
+        self.id = id
         self.skill_set = skill_set
         self.strategy_set = strategy_set
         self.pos_x = pos_x
@@ -52,22 +54,25 @@ class Agent:
     Returns current location and dimensions of desired vision grid
     '''
     def get_grid_details(self):
-        return self.x, self.y, self.skill_set.vision
+        return self.pos_x, self.pos_y, self.skill_set.vision
 
 
 
-    def containsObjectOfInterest(cell_contents, resourceful_or_aggressive):
+    def containsObjectOfInterest(self, cell_contents, resourceful_or_aggressive):
         if resourceful_or_aggressive == "food":
             return "food" in cell_contents
         else:
             for x in cell_contents:
                 if isinstance(x, Agent):
-                    return True
+                    if x.id[0] != self.id[0]:
+                        return True
             return False
 
 
 
     def calculate_move(self, view_range, view_x, view_y, resourceful_or_aggressive: str):
+        grid_height = len(view_range)  
+        grid_width = len(view_range[0]) if grid_height > 0 else 0 
         closest_food = None
         min_distance = float('inf')
         
@@ -87,20 +92,20 @@ class Agent:
 
             while numMoves > 0 and  food_x != view_x:
                 #  change x
-                if food_x < view_x:
+                if food_x < view_x and view_x > 0:
                     self.pos_x -= 1  # up
                     view_x -= 1
-                elif food_x > view_x:
+                elif food_x > view_x and view_x < grid_height - 1:
                     self.pos_x += 1  # down
                     view_x += 1
                 numMoves -= 1
 
             # change y 
             while numMoves > 0 and  food_x != view_x:
-                if food_y < view_y:
+                if food_y < view_y and view_y > 0:
                     self.pos_y -= 1  # left
                     view_y -= 1
-                elif food_y > view_y:
+                elif food_y > view_y and view_y < grid_width - 1:
                     self.pos_y += 1  # right
                     view_y += 1
                 numMoves -= 1
@@ -112,23 +117,31 @@ class Agent:
         modifier=1
         if(random.random() > .5):
             modifier = -1
+
         if(random.random() > .5):
-            self.pos_x += modifier
+            new_view_x = view_x + modifier
+            if 0 <= new_view_x < grid_height:
+                self.pos_x += modifier
+                view_x = new_view_x
         else:
-            self.pos_y += modifier
+            new_view_y = view_y + modifier
+            if 0 <= new_view_y < grid_width:
+                self.pos_y += modifier
+                view_y = new_view_y
+
         return self.pos_x, self.pos_y
     
     '''
     Moving according to an aggressive game strategy. Returns an x,y to move to.
     '''
     def aggressive_move(self, view_range, view_x, view_y):
-        return self.calculate_move(self, view_range, view_x, view_y, "agent")
+        return self.calculate_move(view_range, view_x, view_y, "agent")
 
     '''
     Moving according to a resourcefulness game strategy. Returns an x,y to move to.
     '''
     def resourceful_move(self, view_range, view_x, view_y):
-        return self.calculate_move(self, view_range, view_x, view_y, "food")
+        return self.calculate_move(view_range, view_x, view_y, "food")
     
     '''
     move() -> (x,y)
@@ -154,15 +167,13 @@ class Agent:
 
         aggres_pct = aggres / (aggres + resour)
 
-        probability = random.random(0,1)
+        probability = random.random()
         
         #determine whether to use aggressiveness or resourcefulness 
         if probability < aggres_pct:
             x,y = self.aggressive_move(view_range, view_x, view_y)
         else:
             x,y = self.resourceful_move(view_range, view_x, view_y)
-
-        ## determine how much to move based on vision
 
         return x,y
 
@@ -172,7 +183,9 @@ class Agent:
     def update_energy_after_turn(self):
         # do calculations for how much energy is lost after a turn
         # update_energy(some num)
-        self.update_energy(Config.energy_change_per_turn)
+        self.update_energy(Config.energy_change_per_turn 
+                           - self.skill_set.speed 
+                           - self.skill_set.vision)
 
     '''
     Update the energy level with the given energy

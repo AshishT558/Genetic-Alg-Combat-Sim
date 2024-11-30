@@ -45,8 +45,79 @@ def initialize_game():
     print(user2_skills, user2_strat, user2_upgrades)
 
     # populations of agents
-    population1 = np.array([])
-    population2 = np.array([])
+    population1 = []
+    population2 = []
+
+    # Population 1
+    p1_skills = SkillSet(user1_skills[0], 
+                            user1_skills[1], 
+                            user1_skills[2], 
+                            user1_skills[3],
+                            user1_upgrades[0],
+                            user1_upgrades[1])
+    
+    p1_strategy = StrategySet(user1_strat[0],
+                              user1_strat[1])
+    
+
+    # Population 2
+    p2_skills = SkillSet(user2_skills[0], 
+                            user2_skills[1], 
+                            user2_skills[2], 
+                            user2_skills[3],
+                            user2_upgrades[0],
+                            user2_upgrades[1])
+    
+    p2_strategy = StrategySet(user2_strat[0],
+                              user2_strat[1])
+    
+    ## will fill in populations on the board
+    # population1 will start from upper left corner, population2 will start from bottom right corner
+    # should be two columns of 50 agents each when finished
+    p1_x = 0
+    p1_y = 0
+
+    p2_x = board_dim - 1
+    p2_y = board_dim - 1
+
+
+    for agent_num in range(100):
+        # After one column is filled, move to the next column(right for p1, left for p2)
+        if p1_x == board_dim:
+            #reset grid pointer for pop1
+            p1_x = 0           
+            p1_y += 1   
+        if p2_x == -1:
+            #reset grid pointer for pop2     
+            p2_x = board_dim - 1  
+            p2_y -= 1             
+        
+        a1_id = "1_" + str(agent_num) 
+        a2_id = "2_" + str(agent_num)
+
+        pop1_agent = Agent(id=a1_id, 
+                           skill_set=p1_skills, 
+                           strategy_set=p1_strategy, 
+                           pos_x=p1_x, 
+                           pos_y=p1_y)
+        
+        pop2_agent = Agent(id=a2_id, 
+                           skill_set=p2_skills, 
+                           strategy_set=p2_strategy, 
+                           pos_x=p2_x, 
+                           pos_y=p2_y)
+        
+        population1.append(pop1_agent)
+        population2.append(pop2_agent)
+
+        #move pop1 placement down by 1, pop2 placement up by one
+        p1_x += 1
+        p2_x -= 1
+
+    population1 = np.array(population1)
+    population2 = np.array(population2)
+
+
     
     num_skills = 4
     weights = np.random.rand(num_skills)  # Generate random numbers
@@ -180,4 +251,4 @@ def get_user_inputs():
 
 
 
-#run()
+run()

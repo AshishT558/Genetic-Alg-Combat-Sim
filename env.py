@@ -91,9 +91,9 @@ class Environment:
         self.population1 = population1
         self.population2 = population2
         for agent in population1:
-            self.grid.board.add_occupant(agent.pos_x, agent.pos_y, agent)
+            self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
         for agent in population2:
-            self.grid.board.add_occupant(agent.pos_x, agent.pos_y, agent)
+            self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
         self.grid.randomly_place_food()
 
         # randomly determined combat weights: combat weights is a dictionary
@@ -110,7 +110,7 @@ class Environment:
         for _ in range(self.num_turns):
             #np.random.shuffle(self.pop1_ids)
             #np.random.shuffle(self.pop2_ids)
-            turn_order = np.concatenate(self.population1, self.population2)
+            turn_order = np.append(self.population1, self.population2)
             np.random.shuffle(turn_order)
             self.move(turn_order)
             all_conflicts = self.grid.find_conflicts()
@@ -137,9 +137,9 @@ class Environment:
             # otherwise, do nothing
             if curr_x != new_x or curr_y != new_y:
                 self.relocate_agent(agent, curr_x, curr_y, new_x, new_y)
-                if self.grid.has_food(new_x, new_y):
-                    self.agent_eats_food(agent, new_x, new_y)
-    
+            # if agent is in a cell with food, eat food
+            if self.grid.has_food(new_x, new_y):
+                self.agent_eats_food(agent, new_x, new_y)
     def relocate_agent(self, agent, old_x, old_y, new_x, new_y):
         self.grid.remove_occupant(old_x, old_y, agent)
         self.grid.add_occupant(new_x, new_y, agent)
