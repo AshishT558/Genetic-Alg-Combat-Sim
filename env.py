@@ -123,6 +123,10 @@ class Environment:
         self.all_fights_won_pop2 = []
         self.avg_energy_pop1 = []
         self.avg_energy_pop2 = []
+        self.num_agents_died_pop1 = 0
+        self.all_agents_died_pop1 = []
+        self.num_agents_died_pop2 = 0
+        self.all_agents_died_pop2 = []
         
     '''
     Plays a round of the game
@@ -136,6 +140,8 @@ class Environment:
         #self.grid.count_num_agents()
         self.num_fights_won_pop1 = 0
         self.num_fights_won_pop2 = 0
+        self.num_agents_died_pop1 = 0
+        self.num_agents_died_pop2 = 0
         for _ in range(self.num_turns):
             turn_order = np.append(self.population1, self.population2)
             np.random.shuffle(turn_order)
@@ -149,6 +155,8 @@ class Environment:
         self.avg_energy_pop1.append(avg1)
         avg2 = sum(agent.energy_level for agent in self.population2) / len(self.population2)
         self.avg_energy_pop2.append(avg2)
+        self.all_agents_died_pop1.append(self.num_agents_died_pop1)
+        self.all_agents_died_pop2.append(self.num_agents_died_pop2)
     
     
     '''
@@ -215,9 +223,11 @@ class Environment:
         if np.isin(self.population1, agent).any():
             index = np.where(self.population1 == agent)[0][0]
             self.population1 = np.delete(self.population1, index)
+            self.num_agents_died_pop1 += 1
         elif np.isin(self.population2, agent).any():
             index = np.where(self.population2 == agent)[0][0]
             self.population2 = np.delete(self.population2, index)
+            self.num_agents_died_pop2 += 1
         
     
     def calculate_weighted_score(self, agent):
@@ -258,4 +268,6 @@ class Environment:
         print(f"Number of fights won by Population 2: {sum(self.all_fights_won_pop2)}")
         #print(self.avg_energy_pop1)
         #print(self.avg_energy_pop2)
+        #print(self.all_agents_died_pop1)
+        #print(self.all_agents_died_pop2)
     
