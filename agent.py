@@ -182,9 +182,15 @@ class Agent:
     def update_energy_after_turn(self):
         # do calculations for how much energy is lost after a turn
         # update_energy(some num)
-        self.update_energy(Config.energy_change_per_turn 
-                           - self.skill_set.speed 
-                           - self.skill_set.vision)
+        speed = self.skill_set.speed
+        vision = self.skill_set.vision
+
+        if speed > 1:
+            speed *= 4
+        if vision > 1:
+            vision *= 4
+
+        self.update_energy(-(speed + vision))
 
     '''
     Update the energy level with the given energy
