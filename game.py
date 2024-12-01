@@ -44,11 +44,11 @@ def initialize_game():
     #user2_skills, user2_strat, user2_upgrades = get_user_inputs()
     #print(user2_skills, user2_strat, user2_upgrades)
 
-    user1_skills = [120, 20, 20, 40]
-    user1_strat = [28, 72]
+    user1_skills = [55, 50, 45, 50]
+    user1_strat = [30, 70]
     user1_upgrades = [1, 1]
-    user2_skills = [30, 45, 115, 10]
-    user2_strat = [68, 32]
+    user2_skills = [40, 40, 60, 40]
+    user2_strat = [70, 30]
     user2_upgrades = [1, 1]
     # populations of agents
     population1 = []
@@ -142,8 +142,8 @@ def initialize_game():
 def run():
     env = initialize_game()
     round = 0
-    info_vis = Info_viz()
-    while (round < 500):
+    info_vis = Info_viz(combat_weights=env.combat_weights)
+    while (round < 300):
         print(round)
         env.play_round()
         env.update_population()

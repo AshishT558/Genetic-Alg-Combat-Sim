@@ -1,7 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 
-class SkillTracker():
+class SkillTracker:
     def __init__(self):
         self.strength = []
         self.defense = []
@@ -24,7 +24,7 @@ class SkillTracker():
         self.resourcefulness.append(resourcefulness)
 
 class Info_viz:
-    def __init__(self):
+    def __init__(self, combat_weights):
         self.pop_1_over_time = []
         self.pop_2_over_time = []
         self.pop_1_strength_over_time = []
@@ -38,6 +38,7 @@ class Info_viz:
         self.avg_pop_2 = SkillTracker()
         self.avg_pop_1 = SkillTracker()
         self.output_dir = "saved visuals"
+        self.combat_weights = combat_weights
     
     def add_info(self, pop_1_size, pop_2_size, best_pop_1, best_pop_2, full_pop_1, full_pop_2):
         self.pop_1_over_time.append(pop_1_size)
@@ -92,6 +93,24 @@ class Info_viz:
             self.save_plot_comparison(self.pop_1_resilience_over_time, self.pop_2_resilience_over_time, "resilience")
         if show_averages:
             self.save_plot_comparison_tracker(self.avg_pop_1, self.avg_pop_2, "Average")
+        
+        self.plot_all_skills(self.avg_pop_1, "pop 1")
+        self.plot_all_skills(self.avg_pop_2, "pop 2")
+    
+    def plot_all_skills(self, tracker, name):
+        skills = ["strength", "defense", "agility", "resilience"]
+        plt.figure()
+        for skill in skills:
+            plt.plot(getattr(tracker, skill), label=f"name (combat weight: {round(self.combat_weights[skill], 5)})")
+        plt.title(f"{name} Over Time")
+        plt.xlabel("Time")
+        plt.ylim(0,200)
+        plt.ylabel("Skill Values")
+        plt.legend()
+        pop_1_file = os.path.join(self.output_dir, f"{name}_all_skills.png")
+        plt.savefig(pop_1_file)
+        plt.close()
+
     
     def save_plot_comparison_tracker(self, tracker_1, tracker_2, name):
         skills = ["strength", "defense", "agility", "resilience", "vision", "speed", "aggressiveness", "resourcefulness"]
@@ -104,7 +123,8 @@ class Info_viz:
         plt.plot(to_plot, label=name)
         plt.title(f"{name} Over Time")
         plt.xlabel("Time")
-        plt.ylabel(name)
+        plt.ylim(0,200)
+        plt.ylabel("Skill Value")
         plt.legend()
         pop_1_file = os.path.join(self.output_dir, f"{name}_over_time.png")
         plt.savefig(pop_1_file)
@@ -116,7 +136,8 @@ class Info_viz:
         plt.plot(to_plot_2, label=f"pop 2 {name}")
         plt.title(f"{name} Over Time")
         plt.xlabel("Time")
-        plt.ylabel(name)
+        plt.ylim(0,200)
+        plt.ylabel("Skill Value")
         plt.legend()
         pop_1_file = os.path.join(self.output_dir, f"{name}_over_time.png")
         plt.savefig(pop_1_file)
