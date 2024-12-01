@@ -19,9 +19,16 @@ class SkillSet:
         self.vision = vision
         self.speed = speed
 
+    def add_noise(self, scale_by):
+        self.strength += random.randrange(-scale_by, scale_by)
+        self.defense += random.randrange(-scale_by, scale_by)
+        self.agility += random.randrange(-scale_by, scale_by)
+        self.resilience += random.randrange(-scale_by, scale_by)
+
 class Config:
     food_energy = 20
     energy_change_per_turn = -2
+    noise_scaling = 5
 
 class StrategySet:
     aggressiveness: int
@@ -181,6 +188,9 @@ class Agent:
     '''
     def update_energy_after_turn(self):
         # do calculations for how much energy is lost after a turn
+        #if food present:
+        # energy = energy - 1(speed) - 5(vision) + 30
+        
         # update_energy(some num)
         speed = self.skill_set.speed
         vision = self.skill_set.vision

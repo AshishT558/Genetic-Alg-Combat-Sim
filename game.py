@@ -134,6 +134,7 @@ def initialize_game():
 def run():
     env = initialize_game()
     round = 0
+    info_vis = Info_viz()
     while (round < 100):
         env.play_round()
         env.update_population()
