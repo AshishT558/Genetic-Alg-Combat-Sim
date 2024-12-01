@@ -128,6 +128,7 @@ def initialize_game():
     
     env = Environment(grid, population1, population2, combat_weights)
     return env
+    
 
 
 def run():
@@ -137,7 +138,12 @@ def run():
         env.play_round()
         env.update_population()
         round+=1
+        # if round == 100:
+        #     visualize(env)
+        print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
+        print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))
 
+    print("Game Over: ", round , " rounds played.")
     env.final_stats()
 
 def get_user_inputs():

@@ -208,4 +208,8 @@ class Agent:
     
     
     def get_skill(self, skill):
-        return self.skill_set[skill]
+        return getattr(self.skill_set, skill)
+    
+    def get_skill_set(self):
+        return self.skill_set
+    

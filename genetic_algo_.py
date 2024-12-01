@@ -48,6 +48,7 @@ def adjust_stats(obj, remaining_attrs, delta, total_sum):
     """
     Adjust the remaining attributes to ensure their sum + the mutated value = total_sum.
     """
+    delta = abs(delta)
     # Current total of the remaining attributes
     current_values = [getattr(obj, attr) for attr in remaining_attrs]
     current_total = sum(current_values)
@@ -65,37 +66,51 @@ def adjust_stats(obj, remaining_attrs, delta, total_sum):
 
 # Mutation: 
 def mutate(agent, mutation_rate=0.1, total_sum=200):
-    if random.random() < mutation_rate:
-        # Mutate one of the skillset attributes
-        skill_attrs = ["strength", "defense", "agility", "resilience"]
-        skill_to_mutate = random.choice(skill_attrs)
-        current_value = getattr(agent.skill_set, skill_to_mutate)
+   if random.random() < mutation_rate:
+       # print(f"\nMutating agent {agent.id}...")
 
-        # Generate a new value for the selected attribute within range
-        new_value = random.randint(0, 200)
-        delta = new_value - current_value
+       # Mutate one of the skillset attributes
+       skill_attrs = ["strength", "defense", "agility", "resilience"]
+       skill_to_mutate = random.choice(skill_attrs)
+       current_value = getattr(agent.skill_set, skill_to_mutate)
 
-        # Adjust other skill attributes to maintain the total sum
-        adjust_stats(agent.skill_set, remaining_attrs=[attr for attr in skill_attrs if attr != skill_to_mutate], delta=delta, total_sum=total_sum)
+       # Generate a new value for the selected attribute within range
+       new_value = random.randint(0, 100)
+       delta = new_value - current_value
 
-        # Mutate one of the strategyset attributes
-        strategy_attrs = ["aggressiveness", "resourcefulness"]
-        strategy_to_mutate = random.choice(strategy_attrs)
-        current_value = getattr(agent.strategy_set, strategy_to_mutate)
+       # print(f"Mutating skill '{skill_to_mutate}': current value = {current_value}, new value = {new_value}, delta = {delta}")
 
-        # Generate a new value for the selected attribute within range
-        new_value = random.randint(0, 200)
-        delta = new_value - current_value
+       # Adjust other skill attributes to maintain the total sum
+       adjust_stats(agent.skill_set, remaining_attrs=[attr for attr in skill_attrs if attr != skill_to_mutate], delta=delta, total_sum=total_sum)
 
-        # Adjust other strategy attributes to maintain the total sum
-        adjust_stats(agent.strategy_set, remaining_attrs=[attr for attr in strategy_attrs if attr != strategy_to_mutate], delta=delta, total_sum=total_sum)
+       # Mutate one of the strategyset attributes
+       strategy_attrs = ["aggressiveness", "resourcefulness"]
+       strategy_to_mutate = random.choice(strategy_attrs)
+       current_value = getattr(agent.strategy_set, strategy_to_mutate)
 
-    return agent
+       # Generate a new value for the selected strategy attribute within range (0 to 100)
+       new_value = random.randint(0, 100)  # The value must be between 0 and 100 for strategy sum
+
+       # print(f"Mutating strategy '{strategy_to_mutate}': current value = {current_value}, new value = {new_value}")
+
+       # Adjust the other strategy attribute so that their sum is always 100
+       setattr(agent.strategy_set, strategy_to_mutate, new_value)
+       other_attr = "resourcefulness" if strategy_to_mutate == "aggressiveness" else "aggressiveness"
+       setattr(agent.strategy_set, other_attr, 100 - new_value)
+
+       # print(f"Final strategy stats - Aggressiveness: {agent.strategy_set.aggressiveness}, Resourcefulness: {agent.strategy_set.resourcefulness}")
+
+#    print(f"Final stats after mutation for agent {agent.id}:")
+#    print(f"Skill set: {agent.skill_set}")
+#    print(f"Strategy set: {agent.strategy_set}")
+   return agent
 
 
 # Genetic Algorithm function
 # Genetic Algorithm function
 def genetic_algorithm(pop1, pop2, pop_size1, pop_size2):
+    print("Pop size 1:", pop_size1)
+    print("Pop size 2:", pop_size2)
     # Calculate total energy for both populations
     total_energy_pop1 = sum(agent.energy_level for agent in pop1)
     total_energy_pop2 = sum(agent.energy_level for agent in pop2)
@@ -113,7 +128,7 @@ def genetic_algorithm(pop1, pop2, pop_size1, pop_size2):
     # Generate new offspring using crossover and mutation
     new_agents_pop1 = []
     new_agents_pop2 = []
-    if pop_size1<= pop_size2: 
+    if pop_size1 <= pop_size2: 
     # Ensure that the number of new agents matches the population size
         while len(new_agents_pop1) < pop_size2:
             parent1, parent2 = random.sample(elite_pop1, 2)
@@ -139,10 +154,21 @@ def genetic_algorithm(pop1, pop2, pop_size1, pop_size2):
             child = mutate(child)  # Mutate the child
             new_agents_pop2.append(child)
     # Combine old and new populations
-    new_agents_pop1 = np.array(new_agents_pop1)
-    new_agents_pop2 = np.array(new_agents_pop2)
-    pop1 = np.concatenate((pop1, new_agents_pop1))
-    pop2 = np.concatenate((pop2, new_agents_pop2))
+    # new_agents_pop1 = np.array(new_agents_pop1)
+    # new_agents_pop2 = np.array(new_agents_pop2)
+
+    while(pop_size1 < 100):
+        new_agent = random.sample(new_agents_pop1, 1)
+        pop1 = np.concatenate((pop1, new_agent))
+        pop_size1+=1
+    
+    while(pop_size2 < 100):
+        new_agent = random.sample(new_agents_pop2, 1)
+        pop2 = np.concatenate((pop2, new_agent))
+        pop_size2+=1
+
+    print("Pop size 1:", len(pop1))
+    print("Pop size 2:", len(pop2))
 
     # Select the best agents from each population
     best_agent_pop1 = max(pop1, key=lambda agent: calculate_fitness(agent, total_energy_pop1))

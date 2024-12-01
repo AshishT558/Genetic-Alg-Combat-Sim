@@ -21,8 +21,8 @@ class Grid:
     def remove_occupant(self, i, j, occupant):
         if occupant in self.board[i][j]:
             self.board[i][j].remove(occupant)
-        else:
-            print(f"Warning: Attempted to remove occupant {occupant} from ({i}, {j}), but it was not found.")
+        # else:
+        #     print(f"Warning: Attempted to remove occupant {occupant} from ({i}, {j}), but it was not found.")
         
     def get_view_range(self, curr_x, curr_y, vision):
         min_x = max(0, curr_x - vision)
@@ -93,6 +93,8 @@ class Environment:
         self.num_turns = 50
         self.population1 = population1
         self.population2 = population2
+        self.best_agent_pop1 = None
+        self.best_agent_pop2 = None
         for agent in population1:
             self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
         for agent in population2:
@@ -180,10 +182,10 @@ class Environment:
     def eliminate_agent(self, agent):
         curr_x, curr_y = agent.get_current_position()
         self.grid.remove_occupant(curr_x, curr_y, agent)
-        if np.isin(self.population1, agent):
+        if np.isin(self.population1, agent).any():
             index = np.where(self.population1 == agent)[0][0]
             self.population1 = np.delete(self.population1, index)
-        elif np.isin(self.population2, agent):
+        elif np.isin(self.population2, agent).any():
             index = np.where(self.population2 == agent)[0][0]
             self.population2 = np.delete(self.population2, index)
         
@@ -197,9 +199,11 @@ class Environment:
     def update_population(self):
         self.pop_size1= len(self.population1)
         self.pop_size2= len(self.population2)
-        self.population1, self.population2, best_agent_pop1, best_agent_pop2 = genetic_algorithm(
+        self.population1, self.population2, self.best_agent_pop1, self.best_agent_pop2 = genetic_algorithm(
             self.population1, self.population2,self.pop_size1 , self.pop_size2
         )
+        self.pop_size1= len(self.population1)
+        self.pop_size2= len(self.population2)
 
     
     
@@ -208,5 +212,8 @@ class Environment:
     Presents final stats information after all rounds
     '''
     def final_stats(self):
+        print("Final Stats:")
+        print("Population 1:", self.best_agent_pop1.get_skill('strength'), self.best_agent_pop1.get_skill('defense'), self.best_agent_pop1.get_skill('agility'), self.best_agent_pop1.get_skill('resilience'))
+        print("Population 2:", self.best_agent_pop2.get_skill('strength'), self.best_agent_pop2.get_skill('defense'), self.best_agent_pop2.get_skill('agility'), self.best_agent_pop2.get_skill('resilience'))
         pass
     
