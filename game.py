@@ -2,6 +2,7 @@ from agent import *
 import numpy as np
 from env import *
 from info_viz import *
+from viz_for_inputs import *
 '''
 Initializes game by asking users for inputs and creating environments + agents
 Returns: environment
@@ -36,12 +37,12 @@ def initialize_game():
     
     print("Hello Player 1! Please enter the desired skill set, strategy, and powerups for your agents.")
     print()
-    user1_skills, user1_strat, user1_upgrades = get_user_inputs()
+    user1_skills, user1_strat, user1_upgrades = player1_skills, player1_behavior, player1_preferences
     print(user1_skills, user1_strat, user1_upgrades)
     print()
     print("Hello Player 2! Please enter the desired skill set, strategy, and powerups for your agents.")
     print()
-    user2_skills, user2_strat, user2_upgrades = get_user_inputs()
+    user2_skills, user2_strat, user2_upgrades = player2_skills, player2_behavior, player2_preferences
     print(user2_skills, user2_strat, user2_upgrades)
 
     # populations of agents
@@ -149,6 +150,7 @@ def run():
     print("Game Over: ", round , " rounds played.")
     info_vis.save_info()
     env.final_stats()
+
 
 def get_user_inputs():
     strength = 0
