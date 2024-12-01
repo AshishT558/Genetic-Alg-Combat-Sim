@@ -16,7 +16,8 @@ class Grid:
                 self.board[i, j] = []
 
     def add_occupant(self, i, j, occupant):
-        self.board[i][j].append(occupant)
+        if occupant not in self.board[i][j]:
+            self.board[i][j].append(occupant)
     
     def remove_occupant(self, i, j, occupant):
         if occupant in self.board[i][j]:
@@ -61,15 +62,28 @@ class Grid:
         num_food = int((rows * cols) / 8)
         positions = random.sample([(r, c) for r in range(rows) for c in range(cols)], num_food)
 
+       # num_food_placed = 0
         # Place the items in the selected positions
         for r, c in positions:
-            self.add_occupant(r, c, "food")
+            if len(self.board[r][c]) == 0:
+                self.add_occupant(r, c, "food")
+                #num_food_placed += 1
+        #print(f"----- {num_food_placed}")
     
     def has_food(self, x, y):
         return "food" in self.board[x][y]
     
     def eat_food(self, x, y):
         self.remove_occupant(x, y, "food")
+        
+    def count_num_agents(self):
+        agent_count = 0
+        for r in range(len(self.board)):
+            for c in range(len(self.board[0])):
+                for occupant in self.board[r][c]:
+                    if occupant != "food":
+                        agent_count += 1
+        print(f"----- ----- {agent_count}")
         
                 
                 
@@ -99,9 +113,16 @@ class Environment:
             self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
         for agent in population2:
             self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
-        self.grid.randomly_place_food()
+
         # randomly determined combat weights: combat weights is a dictionary
         self.combat_weights = combat_weights
+        
+        self.num_fights_won_pop1 = 0
+        self.all_fights_won_pop1 = []
+        self.num_fights_won_pop2 = 0
+        self.all_fights_won_pop2 = []
+        self.avg_energy_pop1 = []
+        self.avg_energy_pop2 = []
         
     '''
     Plays a round of the game
@@ -111,16 +132,23 @@ class Environment:
         # call self.move()
         # call self.find_conflicts() -> returns list
         # loops through list returned from find_conflicts, call fight()
-        
+        self.grid.randomly_place_food()
+        #self.grid.count_num_agents()
+        self.num_fights_won_pop1 = 0
+        self.num_fights_won_pop2 = 0
         for _ in range(self.num_turns):
-            #np.random.shuffle(self.pop1_ids)
-            #np.random.shuffle(self.pop2_ids)
             turn_order = np.append(self.population1, self.population2)
             np.random.shuffle(turn_order)
             self.move(turn_order)
             all_conflicts = self.grid.find_conflicts()
             for conflict in all_conflicts:
                 self.fight(conflict[0], conflict[1])
+        self.all_fights_won_pop1.append(self.num_fights_won_pop1)
+        self.all_fights_won_pop2.append(self.num_fights_won_pop2)
+        avg1 = sum(agent.energy_level for agent in self.population1) / len(self.population1)
+        self.avg_energy_pop1.append(avg1)
+        avg2 = sum(agent.energy_level for agent in self.population2) / len(self.population2)
+        self.avg_energy_pop2.append(avg2)
     
     
     '''
@@ -165,9 +193,11 @@ class Environment:
         if agent1_score > agent2_score:
             agent1_status = agent1.update_energy(50)
             agent2_status = agent2.update_energy(-50)
+            self.num_fights_won_pop1 += 1
         elif agent1_score < agent2_score:
             agent1_status = agent1.update_energy(-50)
             agent2_status = agent2.update_energy(50)
+            self.num_fights_won_pop2 += 1
         else:
             agent1_status = agent1.update_energy(-25)
             agent2_status = agent2.update_energy(-25)
@@ -204,6 +234,12 @@ class Environment:
         )
         self.pop_size1= len(self.population1)
         self.pop_size2= len(self.population2)
+        
+        for agent in self.population1:
+            self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
+        for agent in self.population2:
+            self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
+        
 
     
     
@@ -213,7 +249,13 @@ class Environment:
     '''
     def final_stats(self):
         print("Final Stats:")
+        print(f"Combat Weights: {self.combat_weights}")
         print("Population 1:", self.best_agent_pop1.get_skill('strength'), self.best_agent_pop1.get_skill('defense'), self.best_agent_pop1.get_skill('agility'), self.best_agent_pop1.get_skill('resilience'))
         print("Population 2:", self.best_agent_pop2.get_skill('strength'), self.best_agent_pop2.get_skill('defense'), self.best_agent_pop2.get_skill('agility'), self.best_agent_pop2.get_skill('resilience'))
-        pass
+        #print(self.all_fights_won_pop1)
+        print(f"Number of fights won by Population 1: {sum(self.all_fights_won_pop1)}")
+        #print(self.all_fights_won_pop2)
+        print(f"Number of fights won by Population 2: {sum(self.all_fights_won_pop2)}")
+        #print(self.avg_energy_pop1)
+        #print(self.avg_energy_pop2)
     
