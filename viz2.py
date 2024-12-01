@@ -2,7 +2,6 @@ import pygame
 import sys
 import random
 from pytmx import load_pygame
-# from fight_viz import *
 
 # Initialize Pygame
 pygame.init()
@@ -17,6 +16,7 @@ clock = pygame.time.Clock()
 
 # Load the map
 tmxdata = load_pygame(("map.tmx"))
+tmxdata_battle = load_pygame(("battle_map.tmx"))
 
 # Load the sprite sheets
 sprite_sheet_1 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/1/Idle.png").convert_alpha()
@@ -36,6 +36,21 @@ FRAME_HEIGHT_3 = sprite_sheet_3.get_height()
 
 SPRITE_SCALE = 1
 SELECTION_SCALE = 4  # Larger scale for selection screen
+
+# Fight Sprite settings for attack
+sprite_attack_1 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/1/RunAttack2.png").convert_alpha()
+sprite_attack_2 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/2/RunAttack2.png").convert_alpha()
+sprite_attack_3 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/3/RunAttack2.png").convert_alpha()
+
+NUM_FRAMES_ATTACK = 6
+FRAME_WIDTH_ATTACK = sprite_attack_1.get_width() // NUM_FRAMES_ATTACK
+FRAME_HEIGHT_ATTACK = sprite_attack_1.get_height()
+
+FRAME_WIDTH_ATTACK_2 = sprite_attack_2.get_width() // NUM_FRAMES_ATTACK
+FRAME_HEIGHT_ATTACK_2 = sprite_attack_2.get_height()
+
+FRAME_WIDTH_ATTACK_3 = sprite_attack_3.get_width() // NUM_FRAMES_ATTACK
+FRAME_HEIGHT_ATTACK_3 = sprite_attack_3.get_height()
 
 # Extract frames for agent selection
 def extract_preview(sprite_sheet, frame_width, frame_height, scale):
@@ -63,6 +78,10 @@ frames_agent_1 = extract_frames(sprite_sheet_1, FRAME_WIDTH_1, FRAME_HEIGHT_1)
 frames_agent_2 = extract_frames(sprite_sheet_2, FRAME_WIDTH_2, FRAME_HEIGHT_2)
 frames_agent_3 = extract_frames(sprite_sheet_3, FRAME_WIDTH_3, FRAME_HEIGHT_3)
 
+frames_agent_1_attack = extract_frames(sprite_attack_1, FRAME_WIDTH_ATTACK, FRAME_HEIGHT_ATTACK)
+frames_agent_2_attack = extract_frames(sprite_attack_2, FRAME_WIDTH_ATTACK_2, FRAME_HEIGHT_ATTACK_2)
+frames_agent_3_attack = extract_frames(sprite_attack_3, FRAME_WIDTH_ATTACK_3, FRAME_HEIGHT_ATTACK_3)
+
 # Flip frames for the second set of agents
 def flip_frames(frames):
     return [pygame.transform.flip(frame, True, False) for frame in frames]
@@ -89,6 +108,32 @@ def draw_agent_selection(selected_agents):
         click_areas.append((*pos, preview.get_width(), preview.get_height()))
 
     return click_areas
+
+def draw_agent_fight(selected_agents):
+    fight_window = pygame.display.set_mode((800, 600))
+    pygame.display.set_caption('BATTLE:')
+
+    # Tiled map (Underneath)
+    layer1 = tmxdata_battle.get_layer_by_name("Tile Layer 1")
+    layer2 = tmxdata_battle.get_layer_by_name("Tile Layer 2")
+    for x, y, gid in layer1:
+                tile = tmxdata.get_tile_image_by_gid(gid)
+                screen.blit(tile, (x * 16, y * 16))
+    for x, y, gid in layer2:
+                tile = tmxdata.get_tile_image_by_gid(gid)
+                screen.blit(tile, (x * 16, y * 16))
+    
+    # Hard-coded positions for the sprites to be on. 
+    # positions = [
+    #     (1,5),
+    #     (8,5)
+    # ]
+    
+    # fight_frames = [frames_agent_1_attack, frames_agent_2_attack, frames_agent_3_attack]
+    # for i, (x, y) in enumerate(positions):
+    #     agent = Agent(y, x, fight_frames[selected_agents[i] - 1])
+    #     agent.draw()
+
 
 # Agent data structure
 class Agent:
@@ -154,6 +199,20 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    # agent_fight_left = selected_agents[0]
+                    # agent_fight_right = selected_agents[1]
+
+                    # agent_fight_frames_left = [frames_agent_1_attack, frames_agent_2_attack, frames_agent_3_attack][agent_fight_left]
+                    # agent_fight_frames_right = [frames_agent_1_attack, frames_agent_2_attack, frames_agent_3_attack][agent_fight_right]
+                    # agents_fight = initialize_agents(agent_fight_frames_left, flip_frames(agent_fight_frames_right))
+                    draw_agent_fight(selected_agents)
+                    
+                    # for agent in agents_fight:
+                    #     agent.update_animation()
+                    #     agent.draw()
+                    
         elif event.type == pygame.MOUSEBUTTONDOWN and len(selected_agents) < 2:
             # Handle agent selection
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -165,17 +224,24 @@ while True:
                         frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
                         frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
                         agents = initialize_agents(frames_left, flip_frames(frames_right))
-        
     if len(selected_agents) < 2:
         draw_agent_selection(selected_agents)
+
+    #if(conflict):
+        #draw_agent_fight()
     else:
         # screen.fill((135, 206, 235))  # Sky blue background
         draw_grid()
-        
+   
         # Update and draw agents
         for agent in agents:
             agent.update_animation()
             agent.draw()
+            
+    
+    
+    
+
     
     
         
