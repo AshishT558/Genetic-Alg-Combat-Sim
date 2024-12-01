@@ -36,14 +36,20 @@ def initialize_game():
     
     print("Hello Player 1! Please enter the desired skill set, strategy, and powerups for your agents.")
     print()
-    user1_skills, user1_strat, user1_upgrades = get_user_inputs()
-    print(user1_skills, user1_strat, user1_upgrades)
+    #user1_skills, user1_strat, user1_upgrades = get_user_inputs()
+    #print(user1_skills, user1_strat, user1_upgrades)
     print()
     print("Hello Player 2! Please enter the desired skill set, strategy, and powerups for your agents.")
     print()
-    user2_skills, user2_strat, user2_upgrades = get_user_inputs()
-    print(user2_skills, user2_strat, user2_upgrades)
+    #user2_skills, user2_strat, user2_upgrades = get_user_inputs()
+    #print(user2_skills, user2_strat, user2_upgrades)
 
+    user1_skills = [120, 20, 20, 40]
+    user1_strat = [28, 72]
+    user1_upgrades = [1, 1]
+    user2_skills = [30, 45, 115, 10]
+    user2_strat = [68, 32]
+    user2_upgrades = [1, 1]
     # populations of agents
     population1 = []
     population2 = []
@@ -126,7 +132,8 @@ def initialize_game():
     combat_weights = {}
     for i in range(num_skills):
         combat_weights[skill_types[i]] = weights[i]
-    
+    print("combat weights")
+    print(combat_weights)
     env = Environment(grid, population1, population2, combat_weights)
     return env
     
@@ -136,15 +143,16 @@ def run():
     env = initialize_game()
     round = 0
     info_vis = Info_viz()
-    while (round < 100):
+    while (round < 500):
+        print(round)
         env.play_round()
         env.update_population()
         round+=1
         # if round == 100:
         #     visualize(env)
         info_vis.add_info(pop_1_size=env.pop_size1, pop_2_size=env.pop_size2, best_pop_1=env.best_agent_pop1, best_pop_2=env.best_agent_pop2, full_pop_1=env.population1, full_pop_2=env.population2)
-        print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
-        print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))
+        #print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
+        #print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))
 
     print("Game Over: ", round , " rounds played.")
     info_vis.save_info()

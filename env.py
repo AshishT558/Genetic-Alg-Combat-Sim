@@ -58,7 +58,7 @@ class Grid:
     def randomly_place_food(self):
         rows = len(self.board)
         cols = len(self.board[0])
-        num_food = int((rows * cols) / 4)
+        num_food = int((rows * cols) / 8)
         positions = random.sample([(r, c) for r in range(rows) for c in range(cols)], num_food)
 
         # Place the items in the selected positions
@@ -99,7 +99,6 @@ class Environment:
             self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
         for agent in population2:
             self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
-        self.grid.randomly_place_food()
 
         # randomly determined combat weights: combat weights is a dictionary
         self.combat_weights = combat_weights
@@ -112,6 +111,7 @@ class Environment:
         # call self.move()
         # call self.find_conflicts() -> returns list
         # loops through list returned from find_conflicts, call fight()
+        self.grid.randomly_place_food()
         for _ in range(self.num_turns):
             #np.random.shuffle(self.pop1_ids)
             #np.random.shuffle(self.pop2_ids)
