@@ -1,7 +1,11 @@
 from agent import *
 import numpy as np
 from env import *
+<<<<<<< Updated upstream
 
+=======
+from viz2 import setup
+>>>>>>> Stashed changes
 '''
 Initializes game by asking users for inputs and creating environments + agents
 Returns: environment
@@ -57,6 +61,13 @@ def run():
         env.play_round()
         env.update_population()
         round+=1
+<<<<<<< Updated upstream
+=======
+        if round == 100:
+            setup(env)
+        # print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
+        # print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))
+>>>>>>> Stashed changes
 
     env.final_stats()
 

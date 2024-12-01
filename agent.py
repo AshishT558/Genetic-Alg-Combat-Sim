@@ -1,7 +1,12 @@
 import numpy as np
 from numpy.typing import NDArray
 from typing import TypeVar, Generic, Any
+<<<<<<< Updated upstream
 from env import Grid
+=======
+import random
+from viz2 import Agent_sprite
+>>>>>>> Stashed changes
 
 class SkillSet:
     strength: int
@@ -30,7 +35,11 @@ class Agent:
     pos_y: int
     skill_set: SkillSet
     energy_level: int
-
+    sprite: Agent_sprite
+    # frames: list
+    # frame_index: int
+    # animation_speed: float
+    # frame_timer: float
     
 
     def __init__(self, skill_set: SkillSet, pos_x: int, pos_y: int):
@@ -58,9 +67,34 @@ class Agent:
        
     '''
     def move(self, view_range, view_x, view_y):
+<<<<<<< Updated upstream
         # get local grid using vision from Skillset
         x = 0
         y = 0
+=======
+        
+        # if not enough energy to move, or one move depletes energy, stay in same spot
+        if self.energy_level <= 2:
+            return self.pos_x, self.pos_y
+
+        ## determine where to move based on aggressiveness and resourcefulness
+        aggres = self.strategy_set.aggressiveness
+        resour = self.strategy_set.resourcefulness
+
+        aggres_pct = aggres / (aggres + resour)
+
+        probability = random.random()
+        
+        #determine whether to use aggressiveness or resourcefulness 
+        if probability < aggres_pct:
+            x,y = self.aggressive_move(view_range, view_x, view_y)
+        else:
+            x,y = self.resourceful_move(view_range, view_x, view_y)
+        
+        # update sprite to move:
+
+
+>>>>>>> Stashed changes
 
         return x,y
 
