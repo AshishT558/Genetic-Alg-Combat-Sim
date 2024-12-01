@@ -132,8 +132,6 @@ def initialize_game():
     combat_weights = {}
     for i in range(num_skills):
         combat_weights[skill_types[i]] = weights[i]
-    print("combat weights")
-    print(combat_weights)
     env = Environment(grid, population1, population2, combat_weights)
     return env
     
@@ -143,7 +141,7 @@ def run():
     env = initialize_game()
     round = 0
     info_vis = Info_viz()
-    while (round < 500):
+    while (round < 200):
         print(round)
         env.play_round()
         env.update_population()
