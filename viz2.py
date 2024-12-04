@@ -192,7 +192,26 @@ def draw_grid():
 selected_agents = []
 agents = []
 
+food_image = pygame.image.load("/Users/rishi/Downloads/apple.png").convert_alpha()
+food_image = pygame.transform.scale(food_image, (CELL_SIZE, CELL_SIZE))
+
+def initialize_food(num_food):
+    food_positions = set()
+    while len(food_positions) < num_food:
+        row = random.randint(0, GRID_ROWS - 1)
+        col = random.randint(0, GRID_COLS - 1)
+        if (row, col) not in [(agent.row, agent.col) for agent in agents]:
+            food_positions.add((row, col))
+    return food_positions
+
+# Place 10 pieces of food
+food_positions = initialize_food(20)
+
+def draw_food():
+    for row, col in food_positions:
+        screen.blit(food_image, (col * CELL_SIZE, row * CELL_SIZE))
 while True:
+    num_food_items = 20  # Adjust the number of food items
     for event in pygame.event.get():
         # if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
         #     draw_agent_fight()
@@ -232,13 +251,13 @@ while True:
     else:
         # screen.fill((135, 206, 235))  # Sky blue background
         draw_grid()
-   
+        
         # Update and draw agents
         for agent in agents:
             agent.update_animation()
             agent.draw()
             
-    
+        draw_food()
     
     
 
