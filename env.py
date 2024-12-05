@@ -5,6 +5,10 @@ import random
 from genetic_algo_ import *
 T = TypeVar('T', bound=np.generic)
 
+'''
+Grid that the game is played on. The grid is represented by a nparray where
+every item in the grid is a list of the corresponding cell's occupants. 
+'''
 class Grid:
     board: np.array
 
@@ -22,8 +26,6 @@ class Grid:
     def remove_occupant(self, i, j, occupant):
         if occupant in self.board[i][j]:
             self.board[i][j].remove(occupant)
-        # else:
-        #     print(f"Warning: Attempted to remove occupant {occupant} from ({i}, {j}), but it was not found.")
         
     def get_view_range(self, curr_x, curr_y, vision):
         min_x = max(0, curr_x - vision)
@@ -62,13 +64,10 @@ class Grid:
         num_food = int((rows * cols) / 8)
         positions = random.sample([(r, c) for r in range(rows) for c in range(cols)], num_food)
 
-       # num_food_placed = 0
-        # Place the items in the selected positions
+        # Place the items in the selected positions if it is empty
         for r, c in positions:
             if len(self.board[r][c]) == 0:
                 self.add_occupant(r, c, "food")
-                #num_food_placed += 1
-        #print(f"----- {num_food_placed}")
     
     def has_food(self, x, y):
         return "food" in self.board[x][y]
@@ -83,24 +82,21 @@ class Grid:
                 for occupant in self.board[r][c]:
                     if occupant != "food":
                         agent_count += 1
-        print(f"----- ----- {agent_count}")
         
                 
                 
-    
-
-
-
+'''
+Environement that plays out the game. 
+'''
 class Environment:
     grid: Grid
-    #combat_weights: NDArray[T]
     
     '''
+    grid is the grid on which the game is played
     population1 is a nparray of agents for the first population
     population2 is a nparray of agents for the second population
     combat_weights is a dictionary mapping each skill to its corresponding weight
         ex: {"strength": 0.2, "defense": 0.45, "agility": 0.2, "resilience": 0.15}
-    
     '''
     def __init__(self, grid: Grid, population1, population2, combat_weights):
         self.grid = grid
@@ -117,6 +113,7 @@ class Environment:
         # randomly determined combat weights: combat weights is a dictionary
         self.combat_weights = combat_weights
         
+        # For plotting stats
         self.num_fights_won_pop1 = 0
         self.all_fights_won_pop1 = []
         self.num_fights_won_pop2 = 0
@@ -132,12 +129,7 @@ class Environment:
     Plays a round of the game
     '''
     def play_round(self):
-        # shuffle populations to switch up turn order
-        # call self.move()
-        # call self.find_conflicts() -> returns list
-        # loops through list returned from find_conflicts, call fight()
         self.grid.randomly_place_food()
-        #self.grid.count_num_agents()
         self.num_fights_won_pop1 = 0
         self.num_fights_won_pop2 = 0
         self.num_agents_died_pop1 = 0
@@ -149,6 +141,7 @@ class Environment:
             all_conflicts = self.grid.find_conflicts()
             for conflict in all_conflicts:
                 self.fight(conflict[0], conflict[1])
+        # Stat tracking information
         self.all_fights_won_pop1.append(self.num_fights_won_pop1)
         self.all_fights_won_pop2.append(self.num_fights_won_pop2)
         avg1 = sum(agent.energy_level for agent in self.population1) / len(self.population1)
@@ -160,17 +153,12 @@ class Environment:
     
     
     '''
-    Move Function -> loop through each population, move each agent within each population, take away energy used
-    from this move
-    - call agent.move()
+    Every agent takes a turn.
     '''
     def move(self, turn_order):
-        # for loop iterating through populations
-        # within for loop:
-        # call agent.get_grid_details() -> returns dimensions of local grid and center point
-        # create grid
-        # call agent.move(grid)
         for agent in turn_order:
+            # Get s information about the agent's current pos and view
+            # in order to create their view range
             curr_x, curr_y, vision = agent.get_grid_details()
             grid_view, agent_x, agent_y = self.grid.get_view_range(curr_x, curr_y, vision)
             new_x, new_y = agent.move(grid_view, agent_x, agent_y)
@@ -181,6 +169,7 @@ class Environment:
             # if agent is in a cell with food, eat food
             if self.grid.has_food(new_x, new_y):
                 self.agent_eats_food(agent, new_x, new_y)
+                
     def relocate_agent(self, agent, old_x, old_y, new_x, new_y):
         self.grid.remove_occupant(old_x, old_y, agent)
         self.grid.add_occupant(new_x, new_y, agent)
@@ -249,10 +238,6 @@ class Environment:
             self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
         for agent in self.population2:
             self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
-        
-
-    
-    
     
     '''
     Presents final stats information after all rounds
@@ -262,12 +247,6 @@ class Environment:
         print(f"Combat Weights: {self.combat_weights}")
         print("Population 1:", self.best_agent_pop1.get_skill('strength'), self.best_agent_pop1.get_skill('defense'), self.best_agent_pop1.get_skill('agility'), self.best_agent_pop1.get_skill('resilience'))
         print("Population 2:", self.best_agent_pop2.get_skill('strength'), self.best_agent_pop2.get_skill('defense'), self.best_agent_pop2.get_skill('agility'), self.best_agent_pop2.get_skill('resilience'))
-        #print(self.all_fights_won_pop1)
         print(f"Number of fights won by Population 1: {sum(self.all_fights_won_pop1)}")
-        #print(self.all_fights_won_pop2)
         print(f"Number of fights won by Population 2: {sum(self.all_fights_won_pop2)}")
-        #print(self.avg_energy_pop1)
-        #print(self.avg_energy_pop2)
-        #print(self.all_agents_died_pop1)
-        #print(self.all_agents_died_pop2)
     

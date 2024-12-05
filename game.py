@@ -7,49 +7,19 @@ Initializes game by asking users for inputs and creating environments + agents
 Returns: environment
 '''
 def initialize_game():
-    '''
-    starting_points = 100 # Change according to balancing
-    
-    # Skill Point Costs:
-    skill_set_cost = {}
-    for i in getattr(SkillSet, '__annotations__').keys(): # list of attributes in skillset
-        # case for all skills
-        skill_set_cost[i] = 10
-
-        # override for specific attributes (outside of combat) 
-        if i == 'vision':
-            skill_set_cost[i] = 20
-
-    # Default Agent Skills:
-    skill_set_list = np.ones(shape=(1,len(skill_set_cost)))
-    # while user_input != 'done' && starting_points > 0:
-        # skill_set_list[0][user_input] += 1
-        # starting_points -= skill_set_cost[user_input]
-
-    # Numpy array for combat stats
-    skill_set_combat = np.zeros(shape=(1,len(skill_set_cost) - 1))
-    '''
-    ########
-    
     board_dim = 50
     grid = Grid(board_dim, board_dim)
     
     print("Hello Player 1! Please enter the desired skill set, strategy, and powerups for your agents.")
     print()
-    #user1_skills, user1_strat, user1_upgrades = get_user_inputs()
+    user1_skills, user1_strat, user1_upgrades = get_user_inputs()
     #print(user1_skills, user1_strat, user1_upgrades)
     print()
     print("Hello Player 2! Please enter the desired skill set, strategy, and powerups for your agents.")
     print()
-    #user2_skills, user2_strat, user2_upgrades = get_user_inputs()
+    user2_skills, user2_strat, user2_upgrades = get_user_inputs()
     #print(user2_skills, user2_strat, user2_upgrades)
 
-    user1_skills = [55, 50, 45, 50]
-    user1_strat = [30, 70]
-    user1_upgrades = [1, 1]
-    user2_skills = [40, 40, 60, 40]
-    user2_strat = [70, 30]
-    user2_upgrades = [1, 1]
     # populations of agents
     population1 = []
     population2 = []
@@ -123,8 +93,6 @@ def initialize_game():
     population1 = np.array(population1)
     population2 = np.array(population2)
 
-
-    
     num_skills = 4
     weights = np.random.rand(num_skills)  # Generate random numbers
     weights /= weights.sum()  
@@ -141,8 +109,8 @@ def run():
     env = initialize_game()
     round = 0
     info_vis = Info_viz(combat_weights=env.combat_weights)
+    print("Starting the game...")
     while (round < 300):
-        print(round)
         env.play_round()
         env.update_population()
         round+=1
