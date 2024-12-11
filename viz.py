@@ -292,44 +292,106 @@ def agents_meet(agent1, agent2):
     distance = ((agent1.x - agent2.x) ** 2 + (agent1.y - agent2.y) ** 2) ** 0.5
     return distance < CELL_SIZE
 
-
 # Main game loop
-def setup():
-    # battle_started = False
-    # collision_detected = False
-    # Set to true for battle:
-    # battle_started = True
+selected_agents = []
+agents = []
+
+food_image = pygame.image.load("apple.png").convert_alpha()
+# food_image = pygame.transform.scale(food_image, (CELL_SIZE, CELL_SIZE))
+
+def initialize_food(num_food):
+    food_positions = set()
+    while len(food_positions) < num_food:
+        row = random.randint(0, GRID_ROWS - 1)
+        col = random.randint(0, GRID_COLS - 1)
+        if (row, col) not in [(agent.row, agent.col) for agent in agents]:
+            food_positions.add((row, col))
+    return food_positions
+
+# Place 10 pieces of food
+food_positions = initialize_food(20)
+
+def draw_food():
+    for row, col in food_positions:
+        screen.blit(food_image, (col * CELL_SIZE, row * CELL_SIZE))
+
+def visualize(env):
     while True:
+        num_food_items = 20  # Adjust the number of food items
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                pygame.quit()
-                sys.exit()
+            # if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            #     draw_agent_fight()
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()
-        #     elif event.type == pygame.MOUSEBUTTONDOWN and len(selected_agents) < 2:
-        #         # Handle agent selection
-        #         mouse_x, mouse_y = pygame.mouse.get_pos()
-        #         click_areas = draw_agent_selection(selected_agents)
-        #         for i, (x, y, w, h) in enumerate(click_areas):
-        #             if x < mouse_x < x + w and y < mouse_y < y + h and (i + 1) not in selected_agents:
-        #                 selected_agents.append(i + 1)
-        #                 if len(selected_agents) == 2:
-        #                     frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
-        #                     frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
-        #                     agents_sprites = initialize_agents(np.concatenate((env.population1, env.population2)), frames_left, flip_frames(frames_right))
-        # if len(selected_agents) < 2:
-        #     draw_agent_selection(selected_agents)
+                sys.exit()          
+            elif event.type == pygame.MOUSEBUTTONDOWN and len(selected_agents) < 2:
+                # Handle agent selection
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                click_areas = draw_agent_selection(selected_agents)
+                for i, (x, y, w, h) in enumerate(click_areas):
+                    if x < mouse_x < x + w and y < mouse_y < y + h and (i + 1) not in selected_agents:
+                        selected_agents.append(i + 1)
+                        if len(selected_agents) == 2:
+                            frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
+                            frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
+                            agents = initialize_agents(np.concatenate(env.population1, env.population2), frames_left, flip_frames(frames_right))
+        if len(selected_agents) < 2:
+            draw_agent_selection(selected_agents)
+
         #if(conflict):
             #draw_agent_fight()
         else:
             # screen.fill((135, 206, 235))  # Sky blue background
             draw_grid()
-            # env.play_round()
+            
             # Update and draw agents
-            # for agent in agents_sprites:
-            #     agent.update_animation()
-            #     agent.draw()
-
+            for agent in agents:
+                agent.update_animation()
+                agent.draw()
+                
+            draw_food()
+        
         pygame.display.flip()
         clock.tick(60)
+
+
+# # Main game loop
+# def setup():
+#     # battle_started = False
+#     # collision_detected = False
+#     # Set to true for battle:
+#     # battle_started = True
+#     while True:
+#         for event in pygame.event.get():
+#             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+#                 pygame.quit()
+#                 sys.exit()
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#         #     elif event.type == pygame.MOUSEBUTTONDOWN and len(selected_agents) < 2:
+#         #         # Handle agent selection
+#         #         mouse_x, mouse_y = pygame.mouse.get_pos()
+#         #         click_areas = draw_agent_selection(selected_agents)
+#         #         for i, (x, y, w, h) in enumerate(click_areas):
+#         #             if x < mouse_x < x + w and y < mouse_y < y + h and (i + 1) not in selected_agents:
+#         #                 selected_agents.append(i + 1)
+#         #                 if len(selected_agents) == 2:
+#         #                     frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
+#         #                     frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
+#         #                     agents_sprites = initialize_agents(np.concatenate((env.population1, env.population2)), frames_left, flip_frames(frames_right))
+#         # if len(selected_agents) < 2:
+#         #     draw_agent_selection(selected_agents)
+#         #if(conflict):
+#             #draw_agent_fight()
+#         else:
+#             # screen.fill((135, 206, 235))  # Sky blue background
+#             draw_grid()
+#             # env.play_round()
+#             # Update and draw agents
+#             # for agent in agents_sprites:
+#             #     agent.update_animation()
+#             #     agent.draw()
+
+#         pygame.display.flip()
+#         clock.tick(60)

@@ -6,17 +6,6 @@ from info_viz import *
 Initializes game by asking users for inputs and creating environments + agents
 Returns: environment
 '''
-# # Initialize Pygame
-pygame.init()
-# Screen settings
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 800
-GRID_ROWS, GRID_COLS = 50, 50  # Number of rows and columns in the grid
-CELL_SIZE = SCREEN_WIDTH // GRID_COLS  # Size of each cell
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Agent Selection")
-clock = pygame.time.Clock()
-# Load the map
-tmxdata = load_pygame(("map.tmx"))
 
 def initialize_game():
     board_dim = 50
@@ -69,7 +58,7 @@ def initialize_game():
     p2_y = board_dim - 1
 
 
-    for agent_num in range(10):
+    for agent_num in range(100):
         # After one column is filled, move to the next column(right for p1, left for p2)
         if p1_x == board_dim:
             #reset grid pointer for pop1
@@ -124,16 +113,13 @@ def run():
     info_vis = Info_viz(combat_weights=env.combat_weights)
     print("Starting the game...")
 
-    while (round < 50):
+    while (round < 20):
         # for event in pygame.event.get():
-        draw_grid()
         env.play_round()
         env.update_population()
         round+=1
-        pygame.display.flip()
-        clock.tick(60)
-        # if round == 100:
-        #     visualize(env)
+        if round == 20:
+            visualize(env)
         # info_vis.add_info(pop_1_size=env.pop_size1, pop_2_size=env.pop_size2, best_pop_1=env.best_agent_pop1, best_pop_2=env.best_agent_pop2, full_pop_1=env.population1, full_pop_2=env.population2)
         #print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
         #print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))

@@ -172,22 +172,22 @@ class Environment:
             # otherwise, do nothing
             if curr_x != new_x or curr_y != new_y:
                 self.relocate_agent(agent, curr_x, curr_y, new_x, new_y)
-                if(type(agent) != str):
+                #if(type(agent) != str):
                     # agent.sprite.move_towards(new_x, new_y)
-                    agent.sprite.set_position(new_x, new_y)
+                    #agent.sprite.set_position(new_x, new_y)
 
             
             # if agent is in a cell with food, eat food
             if self.grid.has_food(new_x, new_y):
                 self.agent_eats_food(agent, new_x, new_y)
 
-            if(type(agent) != str):
-                #try:
-                    #agent.sprite.move_towards(new_x, new_y)
-                agent.sprite.update_animation()
-                agent.sprite.draw()
-                # except AttributeError:
-                #     pass
+            # if(type(agent) != str):
+            #     #try:
+            #         #agent.sprite.move_towards(new_x, new_y)
+            #     agent.sprite.update_animation()
+            #     agent.sprite.draw()
+            #     # except AttributeError:
+            #     #     pass
             
             
                 
