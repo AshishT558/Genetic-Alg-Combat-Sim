@@ -2,6 +2,7 @@ from agent import *
 import numpy as np
 from env import *
 from info_viz import *
+from final_round_viz import final_battle
 '''
 Initializes game by asking users for inputs and creating environments + agents
 Returns: environment
@@ -152,9 +153,12 @@ def run():
         #print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
         #print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))
     
+    
     print("Game Over: ", round , " rounds played.")
     info_vis.save_info()
     env.final_stats()
+    final_battle(env.best_agent_pop1, env.best_agent_pop2, env.combat_weights)
+    pygame.quit()  # Ensure Pygame quits after the final battle window is closed
     
 
 def get_user_inputs():

@@ -1,25 +1,27 @@
 import pygame
 import sys
 import random
-
+from pytmx import load_pygame
 # Initialize Pygame
 pygame.init()
 
 # Screen settings
-SCREEN_WIDTH, SCREEN_HEIGHT = 500, 300
+SCREEN_WIDTH, SCREEN_HEIGHT = 320, 320
 GRID_ROWS, GRID_COLS = 20, 20
 CELL_SIZE = SCREEN_WIDTH // GRID_COLS
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Agent Battle")
 clock = pygame.time.Clock()
 
+tmxdata_battle = load_pygame(("battle_map.tmx"))
+
 # Load the sprite sheets
-sprite_sheet_1 = pygame.image.load("/Users/rishi/Downloads/craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/1/Run.png").convert_alpha()
-sprite_sheet_2 = pygame.image.load("/Users/rishi/Downloads/craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/2/Run.png").convert_alpha()
-sprite_sheet_3 = pygame.image.load("/Users/rishi/Downloads/craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/3/Run.png").convert_alpha()
-sprite_attack_1 = pygame.image.load("/Users/rishi/Downloads/craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/1/Attack2.png").convert_alpha()
-sprite_attack_2 = pygame.image.load("/Users/rishi/Downloads/craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/2/Attack2.png").convert_alpha()
-sprite_attack_3 = pygame.image.load("/Users/rishi/Downloads/craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/3/Attack2.png").convert_alpha()
+sprite_sheet_1 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/1/Run.png").convert_alpha()
+sprite_sheet_2 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/2/Run.png").convert_alpha()
+sprite_sheet_3 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/3/Run.png").convert_alpha()
+sprite_attack_1 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/1/Attack2.png").convert_alpha()
+sprite_attack_2 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/2/Attack2.png").convert_alpha()
+sprite_attack_3 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/3/Attack2.png").convert_alpha()
 
 # Sprite settings
 NUM_FRAMES = 6
@@ -57,13 +59,15 @@ def flip_frames(frames):
 class Champion:
     hp: float
     attack: float
-    def __init__(self, row, col, frames, is_flipped=False, ):
+    def __init__(self, row, col, frames, hp, attack, is_flipped=False):
         self.row = row
         self.col = col
         self.frames = frames
         self.frame_index = 0
         self.animation_speed = 0.1
         self.frame_timer = 0
+        self.hp = hp
+        self.attack = attack
         self.is_flipped = is_flipped
         self.x = col * CELL_SIZE + CELL_SIZE // 2
         self.y = row * CELL_SIZE + CELL_SIZE // 2
@@ -97,16 +101,8 @@ class Champion:
     def draw(self):
         current_frame = self.frames[self.frame_index]
         screen.blit(current_frame, (self.x - current_frame.get_width() // 2, self.y - current_frame.get_height() // 2))
-
 # Initialize agents
-selected_agents = [1, 2]  # Preselected agents for simplicity
-frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
-frames_right = flip_frames([frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1])
-
-agent_left = Champion(GRID_ROWS // 2, 2, frames_left)
-agent_right = Champion(GRID_ROWS // 2, GRID_COLS - 3, frames_right)
-
-agents = [agent_left, agent_right]
+selected_agents = [1, 3]  # Preselected agents for simplicity
 
 num_frames_death = 8
 # Extract attack frames
@@ -117,9 +113,9 @@ frames_attack_3 = extract_frames(sprite_attack_3, FRAME_WIDTH_3, FRAME_HEIGHT_3,
 frames_attack_left = [frames_attack_1, frames_attack_2, frames_attack_3][selected_agents[0] - 1]
 frames_attack_right = flip_frames([frames_attack_1, frames_attack_2, frames_attack_3][selected_agents[1] - 1])
 
-sprite_death_1 = pygame.image.load("/Users/rishi/Downloads/craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/1/Death.png").convert_alpha()
-sprite_death_2 = pygame.image.load("/Users/rishi/Downloads/craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/2/Death.png").convert_alpha()
-sprite_death_3 = pygame.image.load("/Users/rishi/Downloads/craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/3/Death.png").convert_alpha()
+sprite_death_1 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/1/Death.png").convert_alpha()
+sprite_death_2 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/2/Death.png").convert_alpha()
+sprite_death_3 = pygame.image.load("craftpix-net-154153-free-tiny-pixel-hero-sprites-with-melee-attacks/3/Death.png").convert_alpha()
 
 frames_death_1 = extract_frames(sprite_death_1, FRAME_WIDTH_1, FRAME_HEIGHT_1, num_frames_death)
 frames_death_2 = extract_frames(sprite_death_2, FRAME_WIDTH_2, FRAME_HEIGHT_2, num_frames_death)
@@ -127,10 +123,6 @@ frames_death_3 = extract_frames(sprite_death_3, FRAME_WIDTH_3, FRAME_HEIGHT_3, n
 
 frames_death_left = [frames_death_1, frames_death_2, frames_death_3][selected_agents[0] - 1]
 frames_death_right = flip_frames([frames_death_1, frames_death_2, frames_death_3][selected_agents[1] - 1])
-
-# Flags for fight outcome
-death_animation_started = False
-dead_agent = None
 
 # Add collision detection and sprite switching
 def agents_meet(agent1, agent2):
@@ -140,10 +132,29 @@ def agents_meet(agent1, agent2):
 
 
 def final_battle(agent1, agent2, combat_weights):
+    pygame.display.set_caption("Final Battle")
+    battle_screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
+    frames_right = flip_frames([frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1])
+
+    agent_left = Champion(GRID_ROWS // 2, 2, frames_left, hp = agent1.energy_level, attack = agent1.get_skill("strength") * combat_weights["strength"] + 
+                          agent1.get_skill("defense") * combat_weights["defense"] +
+                          agent1.get_skill("agility") * combat_weights["agility"] +
+                          agent1.get_skill("resilience") * combat_weights["resilience"])
+                          
+    agent_right = Champion(GRID_ROWS // 2, GRID_COLS - 3, frames_right, hp = agent2.energy_level, attack = agent2.get_skill("strength") * combat_weights["strength"] +
+                            agent2.get_skill("defense") * combat_weights["defense"] +
+                            agent2.get_skill("agility") * combat_weights["agility"] +
+                            agent2.get_skill("resilience") * combat_weights["resilience"])
+
+    agents = [agent_left, agent_right]
+    
     # Main game loop
     battle_started = False
     collision_detected = False
-
+    # Flags for fight outcome
+    death_animation_started = False
+    dead_agent = None
     
     while True:
         for event in pygame.event.get():
@@ -154,8 +165,12 @@ def final_battle(agent1, agent2, combat_weights):
                 if event.key == pygame.K_SPACE:  # Start battle on space press
                     battle_started = True
 
-        screen.fill((135, 206, 235))  # Sky blue background
-
+        # Tiled map (Underneath)
+        layer = tmxdata_battle.get_layer_by_name("Tile Layer 1")
+        for x, y, gid in layer:
+                    tile = tmxdata_battle.get_tile_image_by_gid(gid)
+                    battle_screen.blit(tile, (x * CELL_SIZE, y * CELL_SIZE))
+        
         if battle_started and not collision_detected:
             # Move agents toward each other
             agent_left.move_towards(agent_right.x, agent_right.y)
@@ -167,14 +182,19 @@ def final_battle(agent1, agent2, combat_weights):
                 agent_left.frames = frames_attack_left
                 agent_right.frames = frames_attack_right
 
+
         elif collision_detected and not death_animation_started:
-            # Decide the "dead" agent randomly
-            dead_agent = random.choice([agent_left, agent_right])
-            if dead_agent == agent_left:
+            # begin combat
+            agent_left.hp -= agent_right.attack
+            agent_right.hp -= agent_left.attack
+            if agent_left.hp <= 0:
                 agent_left.frames = frames_death_left
-            else:
+                death_animation_started = True
+            elif agent_right.hp <= 0:
                 agent_right.frames = frames_death_right
-            death_animation_started = True
+                death_animation_started = True
+
+            
 
         # Update and draw agents
         for agent in agents:
