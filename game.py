@@ -6,6 +6,18 @@ from info_viz import *
 Initializes game by asking users for inputs and creating environments + agents
 Returns: environment
 '''
+# # Initialize Pygame
+pygame.init()
+# Screen settings
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 800
+GRID_ROWS, GRID_COLS = 50, 50  # Number of rows and columns in the grid
+CELL_SIZE = SCREEN_WIDTH // GRID_COLS  # Size of each cell
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Agent Selection")
+clock = pygame.time.Clock()
+# Load the map
+tmxdata = load_pygame(("map.tmx"))
+
 def initialize_game():
     board_dim = 50
     grid = Grid(board_dim, board_dim)
@@ -57,7 +69,7 @@ def initialize_game():
     p2_y = board_dim - 1
 
 
-    for agent_num in range(100):
+    for agent_num in range(10):
         # After one column is filled, move to the next column(right for p1, left for p2)
         if p1_x == board_dim:
             #reset grid pointer for pop1
@@ -75,13 +87,14 @@ def initialize_game():
                            skill_set=p1_skills, 
                            strategy_set=p1_strategy, 
                            pos_x=p1_x, 
-                           pos_y=p1_y, sprite = Agent_sprite(p1_x, p1_y, fram))
+                           pos_y=p1_y, sprite = Agent_sprite(p1_x, p1_y, extract_frames(sprite_sheet_1, FRAME_WIDTH_1, FRAME_HEIGHT_1, NUM_FRAMES_IDLE)))
         
         pop2_agent = Agent(id=a2_id, 
                            skill_set=p2_skills, 
                            strategy_set=p2_strategy, 
                            pos_x=p2_x, 
-                           pos_y=p2_y)
+                           pos_y=p2_y, sprite = Agent_sprite(p2_x, p2_y, flip_frames(extract_frames(sprite_sheet_3, FRAME_WIDTH_3, FRAME_HEIGHT_3, NUM_FRAMES_IDLE))))
+
         
         population1.append(pop1_agent)
         population2.append(pop2_agent)
@@ -110,19 +123,25 @@ def run():
     round = 0
     info_vis = Info_viz(combat_weights=env.combat_weights)
     print("Starting the game...")
-    while (round < 300):
+
+    while (round < 50):
+        # for event in pygame.event.get():
+        draw_grid()
         env.play_round()
         env.update_population()
         round+=1
+        pygame.display.flip()
+        clock.tick(60)
         # if round == 100:
         #     visualize(env)
         # info_vis.add_info(pop_1_size=env.pop_size1, pop_2_size=env.pop_size2, best_pop_1=env.best_agent_pop1, best_pop_2=env.best_agent_pop2, full_pop_1=env.population1, full_pop_2=env.population2)
         #print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
         #print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))
-
+    
     print("Game Over: ", round , " rounds played.")
     info_vis.save_info()
     env.final_stats()
+    
 
 def get_user_inputs():
     strength = 0
@@ -134,7 +153,8 @@ def get_user_inputs():
         points_left = 200
         while True:
             try:
-                strength = int(input("Strength: "))
+                strength = 50
+                #int(input("Strength: "))
                 if strength < 0 or strength > 200:
                     print("Invalid input. Strength must be a value between 0 and 200.")
                     continue
@@ -146,7 +166,8 @@ def get_user_inputs():
         print(f"Points left: {points_left}")
         while True:
             try:
-                defense = int(input("Defense: "))
+                defense = 50
+                #int(input("Defense: "))
                 if defense < 0 or defense > 200:
                     print("Invalid input. Defense must be a value between 0 and 200.")
                     continue
@@ -158,7 +179,8 @@ def get_user_inputs():
         print(f"Points left: {points_left}")
         while True:
             try:
-                agility = int(input("Agility: "))
+                agility = 50
+                #int(input("Agility: "))
                 if agility < 0 or agility > 200:
                     print("Invalid input. Agility must be a value between 0 and 200.")
                     continue
@@ -170,7 +192,8 @@ def get_user_inputs():
         print(f"Points left: {points_left}")  
         while True:
             try:
-                resilience = int(input("Resilience: "))
+                resilience = 50
+                #int(input("Resilience: "))
                 if resilience < 0 or resilience > 200:
                     print("Invalid input. Resilience must be a value between 0 and 200.")
                     continue
@@ -190,7 +213,8 @@ def get_user_inputs():
     print("An agent's strategy is based on Aggressiveness vs Resourcefulness. Pick the weight (a percentage) that you want to assign to your agent's aggressiveness, with the complement being assigned to the agent's resourcefulness.")
     while True:
         try:
-            aggressiveness = int(input("Aggressiveness: "))
+            aggressiveness = 76
+            #int(input("Aggressiveness: "))
             if aggressiveness < 0 or aggressiveness > 100:
                 print("Invalid input. Aggressiveness should be between 0 and 100.")
                 continue
@@ -207,7 +231,7 @@ def get_user_inputs():
     print("Vision refers to how far away the agent can see, with the levels corresponding to how many cells away the agent can observe. The possible vision levels are 1x, 2x, or 3x.")
     while True:
         try:
-            vision = int(input("Vision (1, 2, 3): "))
+            vision = 2#int(input("Vision (1, 2, 3): "))
             if vision <= 0 or vision > 3:
                 print("Invalid input. Possible vision levels are 1, 2, and 3.")
                 continue
@@ -219,7 +243,7 @@ def get_user_inputs():
     print("Speed refers to how fast an agent can move in one move, with the levels corresponding to how many cells away the agent can go in one move. The possible speed levels are 1x, 2x, or 3x.")
     while True:
         try:
-            speed = int(input("Speed (1, 2, 3): "))
+            speed = 1 #int(input("Speed (1, 2, 3): "))
             if speed <= 0 or speed > 3:
                 print("Invalid input. Possible speed levels are 1, 2, and 3.")
                 continue

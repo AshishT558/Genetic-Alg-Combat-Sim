@@ -55,6 +55,12 @@ class Agent:
         self.energy_level = 200
         self.sprite = sprite
 
+    
+    def get_sprite_frames(self):
+        return self.sprite.frames
+    
+    def set_sprite(self, sprite):
+        self.sprite = sprite
     '''
     Returns current location and dimensions of desired vision grid
     '''

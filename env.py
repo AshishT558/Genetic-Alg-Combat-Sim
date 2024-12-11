@@ -22,10 +22,14 @@ class Grid:
     def add_occupant(self, i, j, occupant):
         if occupant not in self.board[i][j]:
             self.board[i][j].append(occupant)
+        # if occupant != "food":
+        #     occupant.sprite.set_position(i, j)
     
     def remove_occupant(self, i, j, occupant):
         if occupant in self.board[i][j]:
             self.board[i][j].remove(occupant)
+        # if occupant != "food":
+        #     occupant.sprite = None
         
     def get_view_range(self, curr_x, curr_y, vision):
         min_x = max(0, curr_x - vision)
@@ -157,22 +161,41 @@ class Environment:
     '''
     def move(self, turn_order):
         for agent in turn_order:
+            # print("Current Agent: ", agent.id)
             # Get s information about the agent's current pos and view
             # in order to create their view range
             curr_x, curr_y, vision = agent.get_grid_details()
             grid_view, agent_x, agent_y = self.grid.get_view_range(curr_x, curr_y, vision)
             new_x, new_y = agent.move(grid_view, agent_x, agent_y)
+            
             # if agent moves to a new location, update location
             # otherwise, do nothing
             if curr_x != new_x or curr_y != new_y:
                 self.relocate_agent(agent, curr_x, curr_y, new_x, new_y)
+                if(type(agent) != str):
+                    # agent.sprite.move_towards(new_x, new_y)
+                    agent.sprite.set_position(new_x, new_y)
+
+            
             # if agent is in a cell with food, eat food
             if self.grid.has_food(new_x, new_y):
                 self.agent_eats_food(agent, new_x, new_y)
+
+            if(type(agent) != str):
+                #try:
+                    #agent.sprite.move_towards(new_x, new_y)
+                agent.sprite.update_animation()
+                agent.sprite.draw()
+                # except AttributeError:
+                #     pass
+            
+            
                 
     def relocate_agent(self, agent, old_x, old_y, new_x, new_y):
         self.grid.remove_occupant(old_x, old_y, agent)
         self.grid.add_occupant(new_x, new_y, agent)
+        
+
         
     def agent_eats_food(self, agent, x, y):
         self.grid.eat_food(x, y)
@@ -217,6 +240,8 @@ class Environment:
             index = np.where(self.population2 == agent)[0][0]
             self.population2 = np.delete(self.population2, index)
             self.num_agents_died_pop2 += 1
+            
+        
         
     
     def calculate_weighted_score(self, agent):

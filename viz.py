@@ -9,8 +9,8 @@ from pytmx import load_pygame
 pygame.init()
 
 # Screen settings
-SCREEN_WIDTH, SCREEN_HEIGHT = 640, 640
-GRID_ROWS, GRID_COLS = 40, 40  # Number of rows and columns in the grid
+SCREEN_WIDTH, SCREEN_HEIGHT = 800,800
+GRID_ROWS, GRID_COLS = 50, 50  # Number of rows and columns in the grid
 CELL_SIZE = SCREEN_WIDTH // GRID_COLS  # Size of each cell
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Agent Selection")
@@ -199,6 +199,7 @@ def draw_agent_selection(selected_agents):
 
 # Agent data structure
 class Agent_sprite:
+    frames: pygame.Surface
     def __init__(self, row, col, frames, is_flipped = False):
         self.row = row
         self.col = col
@@ -210,6 +211,10 @@ class Agent_sprite:
         # self.dx = 0 Horizontal movement speed
         # self.dy = 0 Vertical movement speed
 
+    def set_position(self, row, col):
+        self.row = row
+        self.col = col
+    
     def update_animation(self):
         self.frame_timer += self.animation_speed
         if self.frame_timer >= 1:
@@ -222,21 +227,24 @@ class Agent_sprite:
         current_frame = self.frames[self.frame_index]
         screen.blit(current_frame, (agent_x, agent_y))
 
-    def move_towards(self, target_x, target_y):
-        if self.x < target_x:
+    def move_towards(self, target_row, target_col):
+        if self.row < target_row:
             self.dx = 1
-        elif self.x > target_x:
+        elif self.row > target_row:
             self.dx = -1
         else:
             self.dx = 0
 
-        if self.y < target_y:
+        if self.col < target_col:
             self.dy = 1
-        elif self.y > target_y:
+        elif self.col > target_col:
             self.dy = -1
         else:
             self.dy = 0
-
+        self.row += self.dx
+        self.col += self.dy
+    def die(self):
+        self.kill()
 # Initialize agents sprites
 def initialize_agents(population, frames_left, frames_right):
     agents = []
@@ -286,7 +294,7 @@ def agents_meet(agent1, agent2):
 
 
 # Main game loop
-def setup(env):
+def setup():
     # battle_started = False
     # collision_detected = False
     # Set to true for battle:
@@ -299,29 +307,29 @@ def setup(env):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN and len(selected_agents) < 2:
-                # Handle agent selection
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                click_areas = draw_agent_selection(selected_agents)
-                for i, (x, y, w, h) in enumerate(click_areas):
-                    if x < mouse_x < x + w and y < mouse_y < y + h and (i + 1) not in selected_agents:
-                        selected_agents.append(i + 1)
-                        if len(selected_agents) == 2:
-                            frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
-                            frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
-                            agents_sprites = initialize_agents(np.concatenate((env.population1, env.population2)), frames_left, flip_frames(frames_right))
-        if len(selected_agents) < 2:
-            draw_agent_selection(selected_agents)
+        #     elif event.type == pygame.MOUSEBUTTONDOWN and len(selected_agents) < 2:
+        #         # Handle agent selection
+        #         mouse_x, mouse_y = pygame.mouse.get_pos()
+        #         click_areas = draw_agent_selection(selected_agents)
+        #         for i, (x, y, w, h) in enumerate(click_areas):
+        #             if x < mouse_x < x + w and y < mouse_y < y + h and (i + 1) not in selected_agents:
+        #                 selected_agents.append(i + 1)
+        #                 if len(selected_agents) == 2:
+        #                     frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
+        #                     frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
+        #                     agents_sprites = initialize_agents(np.concatenate((env.population1, env.population2)), frames_left, flip_frames(frames_right))
+        # if len(selected_agents) < 2:
+        #     draw_agent_selection(selected_agents)
         #if(conflict):
             #draw_agent_fight()
         else:
             # screen.fill((135, 206, 235))  # Sky blue background
             draw_grid()
-            env.play_round()
+            # env.play_round()
             # Update and draw agents
-            for agent in agents_sprites:
-                agent.update_animation()
-                agent.draw()
+            # for agent in agents_sprites:
+            #     agent.update_animation()
+            #     agent.draw()
 
         pygame.display.flip()
         clock.tick(60)
