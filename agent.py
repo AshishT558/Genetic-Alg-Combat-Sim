@@ -2,6 +2,7 @@ import numpy as np
 from numpy.typing import NDArray
 from typing import TypeVar, Generic, Any
 import random
+from viz import *
 
 class SkillSet:
     strength: int
@@ -19,16 +20,9 @@ class SkillSet:
         self.vision = vision
         self.speed = speed
 
-    def add_noise(self, scale_by):
-        self.strength += random.randrange(-scale_by, scale_by)
-        self.defense += random.randrange(-scale_by, scale_by)
-        self.agility += random.randrange(-scale_by, scale_by)
-        self.resilience += random.randrange(-scale_by, scale_by)
-
 class Config:
     food_energy = 20
     energy_change_per_turn = -2
-    noise_scaling = 5
 
 class StrategySet:
     aggressiveness: int
@@ -45,16 +39,21 @@ class Agent:
     pos_y: int
     skill_set: SkillSet
     energy_level: int
-
+    sprite: Agent_sprite
+    # frames: list
+    # frame_index: int
+    # animation_speed: float
+    # frame_timer: float
     
 
-    def __init__(self, id: str, skill_set: SkillSet, strategy_set: StrategySet, pos_x: int, pos_y: int):
+    def __init__(self, id: str, skill_set: SkillSet, strategy_set: StrategySet, pos_x: int, pos_y: int, sprite: Agent_sprite):
         self.id = id
         self.skill_set = skill_set
         self.strategy_set = strategy_set
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.energy_level = 200
+        self.sprite = sprite
 
     '''
     Returns current location and dimensions of desired vision grid
@@ -180,6 +179,9 @@ class Agent:
             x,y = self.aggressive_move(view_range, view_x, view_y)
         else:
             x,y = self.resourceful_move(view_range, view_x, view_y)
+        
+        # update sprite to move:
+        # self.sprite = set_sprite(self, "move")
 
         return x,y
 
@@ -188,19 +190,10 @@ class Agent:
     '''
     def update_energy_after_turn(self):
         # do calculations for how much energy is lost after a turn
-        #if food present:
-        # energy = energy - 1(speed) - 5(vision) + 30
-        
         # update_energy(some num)
-        speed = self.skill_set.speed
-        vision = self.skill_set.vision
-
-        if speed > 1:
-            speed *= 4
-        if vision > 1:
-            vision *= 4
-
-        self.update_energy(-(speed + vision))
+        self.update_energy(Config.energy_change_per_turn 
+                           - self.skill_set.speed 
+                           - self.skill_set.vision)
 
     '''
     Update the energy level with the given energy

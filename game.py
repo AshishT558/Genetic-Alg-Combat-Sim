@@ -75,7 +75,7 @@ def initialize_game():
                            skill_set=p1_skills, 
                            strategy_set=p1_strategy, 
                            pos_x=p1_x, 
-                           pos_y=p1_y)
+                           pos_y=p1_y, sprite = Agent_sprite(p1_x, p1_y, fram))
         
         pop2_agent = Agent(id=a2_id, 
                            skill_set=p2_skills, 
@@ -116,7 +116,7 @@ def run():
         round+=1
         # if round == 100:
         #     visualize(env)
-        info_vis.add_info(pop_1_size=env.pop_size1, pop_2_size=env.pop_size2, best_pop_1=env.best_agent_pop1, best_pop_2=env.best_agent_pop2, full_pop_1=env.population1, full_pop_2=env.population2)
+        # info_vis.add_info(pop_1_size=env.pop_size1, pop_2_size=env.pop_size2, best_pop_1=env.best_agent_pop1, best_pop_2=env.best_agent_pop2, full_pop_1=env.population1, full_pop_2=env.population2)
         #print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
         #print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))
 
