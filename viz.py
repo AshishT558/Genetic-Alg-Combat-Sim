@@ -92,6 +92,7 @@ def extract_frames(sprite_sheet, frame_width, frame_height, num_frames):
 def flip_frames(frames):
     return [pygame.transform.flip(frame, True, False) for frame in frames]
 
+# Extract frames once
 frames_agent_1 = extract_frames(sprite_sheet_1, FRAME_WIDTH_1, FRAME_HEIGHT_1, NUM_FRAMES_IDLE)
 frames_agent_2 = extract_frames(sprite_sheet_2, FRAME_WIDTH_2, FRAME_HEIGHT_2, NUM_FRAMES_IDLE)
 frames_agent_3 = extract_frames(sprite_sheet_3, FRAME_WIDTH_3, FRAME_HEIGHT_3, NUM_FRAMES_IDLE)
@@ -198,9 +199,17 @@ def draw_agent_selection(selected_agents):
 
 
 # Agent data structure
-class Agent_sprite:
-    frames: pygame.Surface
+class Agent_sprite(pygame.sprite.Sprite):
+    row: int
+    col: int
+    frames: list
+    frame_index: int
+    animation_speed: float
+    frame_timer: float
+    is_flipped: bool
+
     def __init__(self, row, col, frames, is_flipped = False):
+        pygame.sprite.Sprite.__init__(self)
         self.row = row
         self.col = col
         self.frames = frames
@@ -208,8 +217,8 @@ class Agent_sprite:
         self.animation_speed = 0.1
         self.frame_timer = 0
         self.is_flipped = is_flipped
-        # self.dx = 0 Horizontal movement speed
-        # self.dy = 0 Vertical movement speed
+        self.dx = 0 # Horizontal movement speed
+        self.dy = 0 # Vertical movement speed
 
     def set_position(self, row, col):
         self.row = row
@@ -243,30 +252,47 @@ class Agent_sprite:
             self.dy = 0
         self.row += self.dx
         self.col += self.dy
+
     def die(self):
+        if selected_agents:
+            self.frames = [frames_agent_1_death, frames_agent_2_death, frames_agent_3_death][selected_agents[0] - 1]
         self.kill()
+
+    
 # Initialize agents sprites
-def initialize_agents(population, frames_left, frames_right):
+def initialize_agents(population, frames_left, frames_right, combat_weights):
     agents = []
+    
     for agent_pop1 in population[0:99]:
-        agents.append(Agent_sprite(agent_pop1.pos_x, agent_pop1.pos_y, frames_left))
+        damage = agent_pop1.get_skill("strength") * combat_weights["strength"] + agent_pop1.get_skill("agility") * combat_weights["agility"] + agent_pop1.get_skill("resilience") * combat_weights["resilience"] + agent_pop1.get_skill("defense") * combat_weights["defense"]
+        agents.append(Agent_sprite(agent_pop1.pos_x, agent_pop1.pos_y, frames_left, damage, agent_pop1.energy_level))
+        # set opponent: 
     for agent_pop2 in population[100:199]:
-        agents.append(Agent_sprite(agent_pop2.pos_x, agent_pop2.pos_y, frames_right))
+        damage = agent_pop2.get_skill("strength") * combat_weights["strength"] + agent_pop2.get_skill("agility") * combat_weights["agility"] + agent_pop2.get_skill("resilience") * combat_weights["resilience"] + agent_pop2.get_skill("defense") * combat_weights["defense"]
+        agents.append(Agent_sprite(agent_pop2.pos_x, agent_pop2.pos_y, frames_right, damage, agent_pop2.energy_level))
+        # set opponent: 
     return agents
 
 def set_sprite(agent, action):
-    frames_left =   [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
-    frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
-
-    if (action == 'move'):
-        extract_frames(sprite_move_1, FRAME_WIDTH_MOVE, FRAME_HEIGHT_MOVE, NUM_FRAMES_MOVE)
-        Agent_sprite(agent.pos_x, agent.pos_y, extract_frames() )
-    if (action == 'fight'):
-        extract_frames(sprite_attack_1, FRAME_WIDTH_ATTACK, FRAME_HEIGHT_ATTACK, NUM_FRAMES_ATTACK)
-    if (action == 'die'):
-        extract_frames(sprite_death_1, FRAME_WIDTH_1, FRAME_HEIGHT_1, NUM_FRAMES_DEATH)
-
-    #else:# #idle
+    id = agent.sprite_id
+    if(id == 1): 
+        if (action == 'move'):
+            return Agent_sprite(agent.pos_x, agent.pos_y, frames_agent_1_move)
+        if (action == 'fight'):
+            return Agent_sprite(agent.pos_x, agent.pos_y, frames_agent_1_attack)
+        if (action == 'die'):
+            return Agent_sprite(agent.pos_x, agent.pos_y, frames_agent_1_death)
+        else:
+            return Agent_sprite(agent.pos_x, agent.pos_y, frames_agent_1)
+    elif(id == 3):
+        if (action == 'move'):
+            return Agent_sprite(agent.pos_x, agent.pos_y, flip_frames(frames_agent_3_move))
+        if (action == 'fight'):
+            return Agent_sprite(agent.pos_x, agent.pos_y, flip_frames(frames_agent_3_attack))
+        if (action == 'die'):
+            return Agent_sprite(agent.pos_x, agent.pos_y, flip_frames(frames_agent_3_death))
+        else:
+            return Agent_sprite(agent.pos_x, agent.pos_y, flip_frames(frames_agent_3))
 
 # Draw grid function
 def draw_grid():
@@ -289,47 +315,19 @@ dead_agent = None
 # Add collision detection and sprite switching
 def agents_meet(agent1, agent2):
     """Check if two agents meet (overlap) on the grid."""
-    distance = ((agent1.x - agent2.x) ** 2 + (agent1.y - agent2.y) ** 2) ** 0.5
+    distance = ((agent1.row - agent2.row) ** 2 + (agent1.col - agent2.col) ** 2) ** 0.5
     return distance < CELL_SIZE
 
-
 # Main game loop
-def setup():
-    # battle_started = False
-    # collision_detected = False
-    # Set to true for battle:
-    # battle_started = True
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-        #     elif event.type == pygame.MOUSEBUTTONDOWN and len(selected_agents) < 2:
-        #         # Handle agent selection
-        #         mouse_x, mouse_y = pygame.mouse.get_pos()
-        #         click_areas = draw_agent_selection(selected_agents)
-        #         for i, (x, y, w, h) in enumerate(click_areas):
-        #             if x < mouse_x < x + w and y < mouse_y < y + h and (i + 1) not in selected_agents:
-        #                 selected_agents.append(i + 1)
-        #                 if len(selected_agents) == 2:
-        #                     frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
-        #                     frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
-        #                     agents_sprites = initialize_agents(np.concatenate((env.population1, env.population2)), frames_left, flip_frames(frames_right))
-        # if len(selected_agents) < 2:
-        #     draw_agent_selection(selected_agents)
-        #if(conflict):
-            #draw_agent_fight()
-        else:
-            # screen.fill((135, 206, 235))  # Sky blue background
-            draw_grid()
-            # env.play_round()
-            # Update and draw agents
-            # for agent in agents_sprites:
-            #     agent.update_animation()
-            #     agent.draw()
+selected_agents = []
+agents = []
 
-        pygame.display.flip()
-        clock.tick(60)
+food_image = pygame.image.load("apple.png").convert_alpha()
+# food_image = pygame.transform.scale(food_image, (CELL_SIZE, CELL_SIZE))
+
+def draw_food(food_positions):
+    for row, col in food_positions:
+        screen.blit(food_image, (col * CELL_SIZE, row * CELL_SIZE))
+
+
+

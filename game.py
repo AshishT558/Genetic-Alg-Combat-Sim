@@ -18,6 +18,10 @@ clock = pygame.time.Clock()
 # Load the map
 tmxdata = load_pygame(("map.tmx"))
 
+# Extract frames once
+sprite_frames_1 = extract_frames(sprite_sheet_1, FRAME_WIDTH_1, FRAME_HEIGHT_1, NUM_FRAMES_IDLE)
+sprite_frames_3 = flip_frames(extract_frames(sprite_sheet_3, FRAME_WIDTH_3, FRAME_HEIGHT_3, NUM_FRAMES_IDLE))
+
 def initialize_game():
     board_dim = 50
     grid = Grid(board_dim, board_dim)
@@ -69,7 +73,7 @@ def initialize_game():
     p2_y = board_dim - 1
 
 
-    for agent_num in range(10):
+    for agent_num in range(20):
         # After one column is filled, move to the next column(right for p1, left for p2)
         if p1_x == board_dim:
             #reset grid pointer for pop1
@@ -87,13 +91,17 @@ def initialize_game():
                            skill_set=p1_skills, 
                            strategy_set=p1_strategy, 
                            pos_x=p1_x, 
-                           pos_y=p1_y, sprite = Agent_sprite(p1_x, p1_y, extract_frames(sprite_sheet_1, FRAME_WIDTH_1, FRAME_HEIGHT_1, NUM_FRAMES_IDLE)))
+                           pos_y=p1_y, 
+                           sprite=Agent_sprite(p1_x, p1_y, sprite_frames_1), 
+                           sprite_id=1)
         
         pop2_agent = Agent(id=a2_id, 
                            skill_set=p2_skills, 
                            strategy_set=p2_strategy, 
                            pos_x=p2_x, 
-                           pos_y=p2_y, sprite = Agent_sprite(p2_x, p2_y, flip_frames(extract_frames(sprite_sheet_3, FRAME_WIDTH_3, FRAME_HEIGHT_3, NUM_FRAMES_IDLE))))
+                           pos_y=p2_y, 
+                           sprite=Agent_sprite(p2_x, p2_y, sprite_frames_3, is_flipped=True), 
+                           sprite_id=3)
 
         
         population1.append(pop1_agent)
@@ -124,17 +132,23 @@ def run():
     info_vis = Info_viz(combat_weights=env.combat_weights)
     print("Starting the game...")
 
-    while (round < 50):
-        # for event in pygame.event.get():
+    food_image = pygame.image.load("apple.png").convert_alpha()
+    #food_image = pygame.transform.scale(food_image, (CELL_SIZE, CELL_SIZE))
+
+    while (round < 500):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        
         draw_grid()
         env.play_round()
+        env.draw_food(screen, food_image)
         env.update_population()
-        round+=1
+        round += 1
         pygame.display.flip()
-        clock.tick(60)
-        # if round == 100:
-        #     visualize(env)
-        # info_vis.add_info(pop_1_size=env.pop_size1, pop_2_size=env.pop_size2, best_pop_1=env.best_agent_pop1, best_pop_2=env.best_agent_pop2, full_pop_1=env.population1, full_pop_2=env.population2)
+        clock.tick(30)  # Control the frame rate
+        info_vis.add_info(pop_1_size=env.pop_size1, pop_2_size=env.pop_size2, best_pop_1=env.best_agent_pop1, best_pop_2=env.best_agent_pop2, full_pop_1=env.population1, full_pop_2=env.population2)
         #print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
         #print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))
     
@@ -213,7 +227,7 @@ def get_user_inputs():
     print("An agent's strategy is based on Aggressiveness vs Resourcefulness. Pick the weight (a percentage) that you want to assign to your agent's aggressiveness, with the complement being assigned to the agent's resourcefulness.")
     while True:
         try:
-            aggressiveness = 76
+            aggressiveness = 24
             #int(input("Aggressiveness: "))
             if aggressiveness < 0 or aggressiveness > 100:
                 print("Invalid input. Aggressiveness should be between 0 and 100.")
@@ -231,7 +245,7 @@ def get_user_inputs():
     print("Vision refers to how far away the agent can see, with the levels corresponding to how many cells away the agent can observe. The possible vision levels are 1x, 2x, or 3x.")
     while True:
         try:
-            vision = 2#int(input("Vision (1, 2, 3): "))
+            vision = 3#int(input("Vision (1, 2, 3): "))
             if vision <= 0 or vision > 3:
                 print("Invalid input. Possible vision levels are 1, 2, and 3.")
                 continue

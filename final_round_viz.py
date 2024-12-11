@@ -54,8 +54,10 @@ def flip_frames(frames):
     return [pygame.transform.flip(frame, True, False) for frame in frames]
 
 # Agent data structure
-class Agent:
-    def __init__(self, row, col, frames, is_flipped=False):
+class Champion:
+    hp: float
+    attack: float
+    def __init__(self, row, col, frames, is_flipped=False, ):
         self.row = row
         self.col = col
         self.frames = frames
@@ -101,8 +103,8 @@ selected_agents = [1, 2]  # Preselected agents for simplicity
 frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
 frames_right = flip_frames([frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1])
 
-agent_left = Agent(GRID_ROWS // 2, 2, frames_left)
-agent_right = Agent(GRID_ROWS // 2, GRID_COLS - 3, frames_right)
+agent_left = Champion(GRID_ROWS // 2, 2, frames_left)
+agent_right = Champion(GRID_ROWS // 2, GRID_COLS - 3, frames_right)
 
 agents = [agent_left, agent_right]
 
@@ -136,44 +138,48 @@ def agents_meet(agent1, agent2):
     distance = ((agent1.x - agent2.x) ** 2 + (agent1.y - agent2.y) ** 2) ** 0.5
     return distance < CELL_SIZE
 
-# Main game loop
-battle_started = False
-collision_detected = False
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:  # Start battle on space press
-                battle_started = True
 
-    screen.fill((135, 206, 235))  # Sky blue background
+def final_battle(agent1, agent2, combat_weights):
+    # Main game loop
+    battle_started = False
+    collision_detected = False
 
-    if battle_started and not collision_detected:
-        # Move agents toward each other
-        agent_left.move_towards(agent_right.x, agent_right.y)
-        agent_right.move_towards(agent_left.x, agent_left.y)
+    
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:  # Start battle on space press
+                    battle_started = True
 
-        # Check if agents meet
-        if agents_meet(agent_left, agent_right):
-            collision_detected = True
-            agent_left.frames = frames_attack_left
-            agent_right.frames = frames_attack_right
+        screen.fill((135, 206, 235))  # Sky blue background
 
-    elif collision_detected and not death_animation_started:
-        # Decide the "dead" agent randomly
-        dead_agent = random.choice([agent_left, agent_right])
-        if dead_agent == agent_left:
-            agent_left.frames = frames_death_left
-        else:
-            agent_right.frames = frames_death_right
-        death_animation_started = True
+        if battle_started and not collision_detected:
+            # Move agents toward each other
+            agent_left.move_towards(agent_right.x, agent_right.y)
+            agent_right.move_towards(agent_left.x, agent_left.y)
 
-    # Update and draw agents
-    for agent in agents:
-        agent.update_animation()
-        agent.draw()
+            # Check if agents meet
+            if agents_meet(agent_left, agent_right):
+                collision_detected = True
+                agent_left.frames = frames_attack_left
+                agent_right.frames = frames_attack_right
 
-    pygame.display.flip()
-    clock.tick(60)
+        elif collision_detected and not death_animation_started:
+            # Decide the "dead" agent randomly
+            dead_agent = random.choice([agent_left, agent_right])
+            if dead_agent == agent_left:
+                agent_left.frames = frames_death_left
+            else:
+                agent_right.frames = frames_death_right
+            death_animation_started = True
+
+        # Update and draw agents
+        for agent in agents:
+            agent.update_animation()
+            agent.draw()
+
+        pygame.display.flip()
+        clock.tick(60)

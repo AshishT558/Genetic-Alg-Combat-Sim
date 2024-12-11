@@ -22,14 +22,12 @@ class Grid:
     def add_occupant(self, i, j, occupant):
         if occupant not in self.board[i][j]:
             self.board[i][j].append(occupant)
-        # if occupant != "food":
-        #     occupant.sprite.set_position(i, j)
     
     def remove_occupant(self, i, j, occupant):
         if occupant in self.board[i][j]:
             self.board[i][j].remove(occupant)
         # if occupant != "food":
-        #     occupant.sprite = None
+        #     occupant.set_agent_sprite("idle")
         
     def get_view_range(self, curr_x, curr_y, vision):
         min_x = max(0, curr_x - vision)
@@ -65,7 +63,7 @@ class Grid:
     def randomly_place_food(self):
         rows = len(self.board)
         cols = len(self.board[0])
-        num_food = int((rows * cols) / 8)
+        num_food = int((rows * cols) / 24)  # Halve the amount of food
         positions = random.sample([(r, c) for r in range(rows) for c in range(cols)], num_food)
 
         # Place the items in the selected positions if it is empty
@@ -86,6 +84,14 @@ class Grid:
                 for occupant in self.board[r][c]:
                     if occupant != "food":
                         agent_count += 1
+
+    def get_food_positions(self):
+        food_positions = []
+        for r in range(len(self.board)):
+            for c in range(len(self.board[0])):
+                if "food" in self.board[r][c]:
+                    food_positions.append((r, c))
+        return food_positions
         
                 
                 
@@ -94,7 +100,7 @@ Environement that plays out the game.
 '''
 class Environment:
     grid: Grid
-    
+    all_sprites: pygame.sprite.Group
     '''
     grid is the grid on which the game is played
     population1 is a nparray of agents for the first population
@@ -113,6 +119,13 @@ class Environment:
             self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
         for agent in population2:
             self.grid.add_occupant(agent.pos_x, agent.pos_y, agent)
+        
+        all_sprites = pygame.sprite.Group()
+        for agent in population1:
+            all_sprites.add(agent.sprite)
+        for agent in population2:
+            all_sprites.add(agent.sprite)
+        self.all_sprites = all_sprites
 
         # randomly determined combat weights: combat weights is a dictionary
         self.combat_weights = combat_weights
@@ -172,24 +185,25 @@ class Environment:
             # otherwise, do nothing
             if curr_x != new_x or curr_y != new_y:
                 self.relocate_agent(agent, curr_x, curr_y, new_x, new_y)
-                if(type(agent) != str):
-                    # agent.sprite.move_towards(new_x, new_y)
-                    agent.sprite.set_position(new_x, new_y)
+                
+                agent.set_agent_sprite("move")
+                agent.sprite.move_towards(new_x, new_y)
+                # agent.sprite.update_animation()
+                # agent.sprite.draw()
+                    #agent.sprite.set_position(new_x, new_y)
 
             
             # if agent is in a cell with food, eat food
             if self.grid.has_food(new_x, new_y):
                 self.agent_eats_food(agent, new_x, new_y)
 
-            if(type(agent) != str):
-                #try:
-                    #agent.sprite.move_towards(new_x, new_y)
-                agent.sprite.update_animation()
-                agent.sprite.draw()
+            
+            
                 # except AttributeError:
                 #     pass
             
-            
+            agent.sprite.update_animation()
+            agent.sprite.draw()
                 
     def relocate_agent(self, agent, old_x, old_y, new_x, new_y):
         self.grid.remove_occupant(old_x, old_y, agent)
@@ -199,6 +213,7 @@ class Environment:
         
     def agent_eats_food(self, agent, x, y):
         self.grid.eat_food(x, y)
+        self.remove_food_sprite(screen, x, y)
         # function to increase agent's energy after eating food
         agent.eat_food() 
 
@@ -206,6 +221,14 @@ class Environment:
     the two agents fight
     '''
     def fight(self, agent1, agent2):
+        # Set fight sprites
+        agent1.set_agent_sprite("fight")
+        agent1.sprite.update_animation()
+        agent1.sprite.draw()
+        agent2.set_agent_sprite("fight")
+        agent2.sprite.update_animation()
+        agent2.sprite.draw()
+
         agent1_score = self.calculate_weighted_score(agent1)
         agent2_score = self.calculate_weighted_score(agent2)
         agent1_status = True
@@ -221,8 +244,9 @@ class Environment:
         else:
             agent1_status = agent1.update_energy(-25)
             agent2_status = agent2.update_energy(-25)
-        
-        # if agent has died after the fight, remove them from game
+
+
+        # If agent has died after the fight, remove them from game
         if not agent1_status:
             self.eliminate_agent(agent1)
         if not agent2_status:
@@ -231,6 +255,15 @@ class Environment:
     
     def eliminate_agent(self, agent):
         curr_x, curr_y = agent.get_current_position()
+        agent.set_agent_sprite("die")
+        agent.sprite.update_animation()
+        agent.sprite.draw()
+        # Update and draw dying animation
+        # for _ in range(NUM_FRAMES_DEATH):
+        #     agent.sprite.update_animation()
+        #     agent.sprite.draw()
+        #     pygame.display.flip()
+        #     pygame.time.delay(100)
         self.grid.remove_occupant(curr_x, curr_y, agent)
         if np.isin(self.population1, agent).any():
             index = np.where(self.population1 == agent)[0][0]
@@ -240,7 +273,8 @@ class Environment:
             index = np.where(self.population2 == agent)[0][0]
             self.population2 = np.delete(self.population2, index)
             self.num_agents_died_pop2 += 1
-            
+        agent.sprite.die()
+        self.all_sprites.remove(agent.sprite)
         
         
     
@@ -274,4 +308,14 @@ class Environment:
         print("Population 2:", self.best_agent_pop2.get_skill('strength'), self.best_agent_pop2.get_skill('defense'), self.best_agent_pop2.get_skill('agility'), self.best_agent_pop2.get_skill('resilience'))
         print(f"Number of fights won by Population 1: {sum(self.all_fights_won_pop1)}")
         print(f"Number of fights won by Population 2: {sum(self.all_fights_won_pop2)}")
-    
+
+    def draw_food(self, screen, food_image):
+        food_positions = self.grid.get_food_positions()
+        for row, col in food_positions:
+            screen.blit(food_image, (col * CELL_SIZE, row * CELL_SIZE))
+
+    def remove_food_sprite(self, screen, row, col):
+        rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+        pygame.draw.rect(screen, (0, 0, 0), rect)  # Draw over the food sprite with the background color
+
+
