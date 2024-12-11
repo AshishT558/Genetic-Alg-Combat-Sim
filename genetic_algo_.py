@@ -45,7 +45,7 @@ def uniform_crossover(parent1, parent2):
         aggressiveness=new_aggressiveness,
         resourcefulness=100 - new_aggressiveness
     )
-    child = Agent(id=child_id,skill_set=child_skill_set, strategy_set=child_strategy_set, pos_x=parent1.pos_x, pos_y=parent1.pos_y, sprite = Agent_sprite(parent1.pos_x, parent1.pos_y, frames = parent1.get_sprite_frames()))
+    child = Agent(id=child_id,skill_set=child_skill_set, strategy_set=child_strategy_set, pos_x=parent1.pos_x, pos_y=parent1.pos_y)
     child.energy_level = 200 
     return child
 

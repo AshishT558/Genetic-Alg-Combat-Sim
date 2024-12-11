@@ -199,8 +199,9 @@ def draw_agent_selection(selected_agents):
 
 # Agent data structure
 class Agent_sprite:
-    frames: pygame.Surface
-    def __init__(self, row, col, frames, is_flipped = False):
+    hp: float
+    damage: float
+    def __init__(self, row, col, frames, damage, energy, is_flipped = False):
         self.row = row
         self.col = col
         self.frames = frames
@@ -208,6 +209,8 @@ class Agent_sprite:
         self.animation_speed = 0.1
         self.frame_timer = 0
         self.is_flipped = is_flipped
+        self.hp = energy
+        self.damage = damage
         # self.dx = 0 Horizontal movement speed
         # self.dy = 0 Vertical movement speed
 
@@ -243,15 +246,22 @@ class Agent_sprite:
             self.dy = 0
         self.row += self.dx
         self.col += self.dy
+
     def die(self):
-        self.kill()
+        self.damage = 0
+        self.frames = [frames_agent_1_death, frames_agent_2_death, frames_agent_3_death][selected_agents[0] - 1]
 # Initialize agents sprites
-def initialize_agents(population, frames_left, frames_right):
+def initialize_agents(population, frames_left, frames_right, combat_weights):
     agents = []
+    
     for agent_pop1 in population[0:99]:
-        agents.append(Agent_sprite(agent_pop1.pos_x, agent_pop1.pos_y, frames_left))
+        damage = agent_pop1.get_skill("strength") * combat_weights["strength"] + agent_pop1.get_skill("agility") * combat_weights["agility"] + agent_pop1.get_skill("resilience") * combat_weights["resilience"] + agent_pop1.get_skill("defense") * combat_weights["defense"]
+        agents.append(Agent_sprite(agent_pop1.pos_x, agent_pop1.pos_y, frames_left, damage, agent_pop1.energy_level))
+        # set opponent: 
     for agent_pop2 in population[100:199]:
-        agents.append(Agent_sprite(agent_pop2.pos_x, agent_pop2.pos_y, frames_right))
+        damage = agent_pop2.get_skill("strength") * combat_weights["strength"] + agent_pop2.get_skill("agility") * combat_weights["agility"] + agent_pop2.get_skill("resilience") * combat_weights["resilience"] + agent_pop2.get_skill("defense") * combat_weights["defense"]
+        agents.append(Agent_sprite(agent_pop2.pos_x, agent_pop2.pos_y, frames_right, damage, agent_pop2.energy_level))
+        # set opponent: 
     return agents
 
 def set_sprite(agent, action):
@@ -260,7 +270,7 @@ def set_sprite(agent, action):
 
     if (action == 'move'):
         extract_frames(sprite_move_1, FRAME_WIDTH_MOVE, FRAME_HEIGHT_MOVE, NUM_FRAMES_MOVE)
-        Agent_sprite(agent.pos_x, agent.pos_y, extract_frames() )
+        Agent_sprite(agent.pos_x, agent.pos_y, extract_frames())
     if (action == 'fight'):
         extract_frames(sprite_attack_1, FRAME_WIDTH_ATTACK, FRAME_HEIGHT_ATTACK, NUM_FRAMES_ATTACK)
     if (action == 'die'):
@@ -289,7 +299,7 @@ dead_agent = None
 # Add collision detection and sprite switching
 def agents_meet(agent1, agent2):
     """Check if two agents meet (overlap) on the grid."""
-    distance = ((agent1.x - agent2.x) ** 2 + (agent1.y - agent2.y) ** 2) ** 0.5
+    distance = ((agent1.row - agent2.row) ** 2 + (agent1.col - agent2.col) ** 2) ** 0.5
     return distance < CELL_SIZE
 
 # Main game loop
@@ -315,7 +325,12 @@ def draw_food():
     for row, col in food_positions:
         screen.blit(food_image, (col * CELL_SIZE, row * CELL_SIZE))
 
+
+
 def visualize(env):
+    combat_weights = env.combat_weights
+    battle_started = False
+    collision_detected = False
     while True:
         num_food_items = 20  # Adjust the number of food items
         for event in pygame.event.get():
@@ -323,7 +338,10 @@ def visualize(env):
             #     draw_agent_fight()
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()          
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:  # Start battle on space press
+                    battle_started = True          
             elif event.type == pygame.MOUSEBUTTONDOWN and len(selected_agents) < 2:
                 # Handle agent selection
                 mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -334,7 +352,7 @@ def visualize(env):
                         if len(selected_agents) == 2:
                             frames_left = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[0] - 1]
                             frames_right = [frames_agent_1, frames_agent_2, frames_agent_3][selected_agents[1] - 1]
-                            agents = initialize_agents(np.concatenate(env.population1, env.population2), frames_left, flip_frames(frames_right))
+                            agents = initialize_agents(np.concatenate((env.population1, env.population2)), frames_left, flip_frames(frames_right), combat_weights)
         if len(selected_agents) < 2:
             draw_agent_selection(selected_agents)
 
@@ -344,6 +362,32 @@ def visualize(env):
             # screen.fill((135, 206, 235))  # Sky blue background
             draw_grid()
             
+            pop_1 = agents[0:99]
+            pop_2 = agents[100:199]
+            
+            if battle_started:
+                # Move agents toward each other
+                for agent in pop_1:
+                    #sample a random agent from the other population
+                    opponent = random.choice(pop_2)
+                    agent.move_towards(opponent.row, opponent.col)
+                    opponent.move_towards(agent.row, agent.col)
+
+                    if agents_meet(agent, opponent):
+                        collision_detected = True
+                        agent.frames = [frames_agent_1_attack, frames_agent_2_attack, frames_agent_3_attack][selected_agents[0] - 1]
+                        opponent.frames = [frames_agent_1_attack, frames_agent_2_attack, frames_agent_3_attack][selected_agents[1] - 1]
+                        agent.hp -= opponent.damage
+                        opponent.hp -= agent.damage
+                        if agent.hp <= 0:
+                            # agent.die()
+                            agent.damage = 0
+                            agent.frames = [frames_agent_1_death, frames_agent_2_death, frames_agent_3_death][selected_agents[0] - 1]
+                        if opponent.hp <= 0:
+                            # opponent.die()
+                            opponent.damage = 0
+                            opponent.frames = [frames_agent_1_death, frames_agent_2_death, frames_agent_3_death][selected_agents[1] - 1]
+            
             # Update and draw agents
             for agent in agents:
                 agent.update_animation()
@@ -352,7 +396,7 @@ def visualize(env):
             draw_food()
         
         pygame.display.flip()
-        clock.tick(60)
+        clock.tick(12)
 
 
 # # Main game loop

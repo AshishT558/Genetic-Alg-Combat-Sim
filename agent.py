@@ -39,28 +39,20 @@ class Agent:
     pos_y: int
     skill_set: SkillSet
     energy_level: int
-    sprite: Agent_sprite
     # frames: list
     # frame_index: int
     # animation_speed: float
     # frame_timer: float
     
 
-    def __init__(self, id: str, skill_set: SkillSet, strategy_set: StrategySet, pos_x: int, pos_y: int, sprite: Agent_sprite):
+    def __init__(self, id: str, skill_set: SkillSet, strategy_set: StrategySet, pos_x: int, pos_y: int):
         self.id = id
         self.skill_set = skill_set
         self.strategy_set = strategy_set
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.energy_level = 200
-        self.sprite = sprite
 
-    
-    def get_sprite_frames(self):
-        return self.sprite.frames
-    
-    def set_sprite(self, sprite):
-        self.sprite = sprite
     '''
     Returns current location and dimensions of desired vision grid
     '''

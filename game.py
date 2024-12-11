@@ -76,13 +76,13 @@ def initialize_game():
                            skill_set=p1_skills, 
                            strategy_set=p1_strategy, 
                            pos_x=p1_x, 
-                           pos_y=p1_y, sprite = Agent_sprite(p1_x, p1_y, extract_frames(sprite_sheet_1, FRAME_WIDTH_1, FRAME_HEIGHT_1, NUM_FRAMES_IDLE)))
+                           pos_y=p1_y)
         
         pop2_agent = Agent(id=a2_id, 
                            skill_set=p2_skills, 
                            strategy_set=p2_strategy, 
                            pos_x=p2_x, 
-                           pos_y=p2_y, sprite = Agent_sprite(p2_x, p2_y, flip_frames(extract_frames(sprite_sheet_3, FRAME_WIDTH_3, FRAME_HEIGHT_3, NUM_FRAMES_IDLE))))
+                           pos_y=p2_y)
 
         
         population1.append(pop1_agent)
