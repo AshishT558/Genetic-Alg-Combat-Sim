@@ -39,10 +39,7 @@ class Agent:
     pos_y: int
     skill_set: SkillSet
     energy_level: int
-    # frames: list
-    # frame_index: int
-    # animation_speed: float
-    # frame_timer: float
+    #sprite: Agent_sprite
     
 
     def __init__(self, id: str, skill_set: SkillSet, strategy_set: StrategySet, pos_x: int, pos_y: int):
@@ -51,8 +48,11 @@ class Agent:
         self.strategy_set = strategy_set
         self.pos_x = pos_x
         self.pos_y = pos_y
+        #self.Agent_sprite = sprite
         self.energy_level = 200
 
+    #def set_sprite(self, action):
+        #self.sprite = 
     '''
     Returns current location and dimensions of desired vision grid
     '''

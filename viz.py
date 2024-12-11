@@ -201,6 +201,14 @@ def draw_agent_selection(selected_agents):
 class Agent_sprite:
     hp: float
     damage: float
+    row: int
+    col: int
+    frames: list
+    frame_index: int
+    animation_speed: float
+    frame_timer: float
+    is_flipped: bool
+
     def __init__(self, row, col, frames, damage, energy, is_flipped = False):
         self.row = row
         self.col = col
@@ -211,8 +219,8 @@ class Agent_sprite:
         self.is_flipped = is_flipped
         self.hp = energy
         self.damage = damage
-        # self.dx = 0 Horizontal movement speed
-        # self.dy = 0 Vertical movement speed
+        self.dx = 0 # Horizontal movement speed
+        self.dy = 0 # Vertical movement speed
 
     def set_position(self, row, col):
         self.row = row
@@ -371,12 +379,14 @@ def visualize(env):
                     #sample a random agent from the other population
                     opponent = random.choice(pop_2)
                     agent.move_towards(opponent.row, opponent.col)
+                    agent.frames = [frames_agent_1_move, frames_agent_2_move, frames_agent_3_move][selected_agents[0] - 1]
                     opponent.move_towards(agent.row, agent.col)
+                    opponent.frames = flip_frames([frames_agent_1_move, frames_agent_2_move, frames_agent_3_move][selected_agents[1] - 1])
 
                     if agents_meet(agent, opponent):
                         collision_detected = True
                         agent.frames = [frames_agent_1_attack, frames_agent_2_attack, frames_agent_3_attack][selected_agents[0] - 1]
-                        opponent.frames = [frames_agent_1_attack, frames_agent_2_attack, frames_agent_3_attack][selected_agents[1] - 1]
+                        opponent.frames = flip_frames([frames_agent_1_attack, frames_agent_2_attack, frames_agent_3_attack][selected_agents[1] - 1])
                         agent.hp -= opponent.damage
                         opponent.hp -= agent.damage
                         if agent.hp <= 0:
@@ -386,7 +396,12 @@ def visualize(env):
                         if opponent.hp <= 0:
                             # opponent.die()
                             opponent.damage = 0
-                            opponent.frames = [frames_agent_1_death, frames_agent_2_death, frames_agent_3_death][selected_agents[1] - 1]
+                            opponent.frames = flip_frames([frames_agent_1_death, frames_agent_2_death, frames_agent_3_death][selected_agents[1] - 1])
+                    agent.update_animation()
+                    agent.draw()
+                    opponent.update_animation()
+                    opponent.draw()
+                    
             
             # Update and draw agents
             for agent in agents:
@@ -396,7 +411,7 @@ def visualize(env):
             draw_food()
         
         pygame.display.flip()
-        clock.tick(12)
+        clock.tick(8)
 
 
 # # Main game loop
