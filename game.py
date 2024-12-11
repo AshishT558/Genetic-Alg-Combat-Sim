@@ -3,6 +3,7 @@ import numpy as np
 from env import *
 from info_viz import *
 from viz_for_inputs import *
+from viz2 import *
 '''
 Initializes game by asking users for inputs and creating environments + agents
 Returns: environment
@@ -141,8 +142,8 @@ def run():
         env.play_round()
         env.update_population()
         round+=1
-        # if round == 100:
-        #     visualize(env)
+        if round == 100:
+            visualize(env)
         info_vis.add_info(pop_1_size=env.pop_size1, pop_2_size=env.pop_size2, best_pop_1=env.best_agent_pop1, best_pop_2=env.best_agent_pop2, full_pop_1=env.population1, full_pop_2=env.population2)
         print("Best Agent in Population 1: ", env.best_agent_pop1.get_skill('strength'), env.best_agent_pop1.get_skill('defense'), env.best_agent_pop1.get_skill('agility'), env.best_agent_pop1.get_skill('resilience'))
         print("Best Agent in Population 2: ", env.best_agent_pop2.get_skill('strength'), env.best_agent_pop2.get_skill('defense'), env.best_agent_pop2.get_skill('agility'), env.best_agent_pop2.get_skill('resilience'))
